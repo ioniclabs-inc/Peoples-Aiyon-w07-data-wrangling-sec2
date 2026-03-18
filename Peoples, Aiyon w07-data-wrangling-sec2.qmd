@@ -1,0 +1,70 @@
+
+---
+title: "Data Wrangling with  R"
+subtitle: "IBM 320 Section 02"
+author: "ion Peoples"
+date: "2026-03-04"
+format:
+    html:
+      theme: cosmo
+      toc: true
+      toc-depth: 3
+      tocc-location: left
+      embed-resources: 
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: sentence
+execute:
+  freeze: auto
+---
+
+## learning outcome
+
+:::: callout-tip
+-Describe the concept of Data Wrangling.
+-Describe how Tibbles are different from data frames.
+-Explain how to convert wide or long data to "Tidy" data.
+-Explain how to use grouped mutates and filter together.
+-Be familiar with major dplyr functions for transforming data.
+-Create a new variable with mutate() and case_when().
+-Use the pipe operator to shape the data to prepare for analysis and visualization.
+
+too use multi-cursor editing feature, do the following steps:
+
+::: callout-tip
+To use mouse multi-cursor editing feature, do the following steps: 1.
+Select the text you want to edit.
+2.
+Press `shift + alt + i` to place a cursor at the end of each selected line.
+3.
+You can now edit all the selected text simultaneously.
+:::
+
+# Introduction to Data Wrangling
+
+##loading packages **Note** To add a code chunk, you can use the keyboard shortcut 'Ctrl+ Alt + I'.
+
+```{r}
+#install.packages("tidyverse")
+#install.packages("nycflights13")
+
+library(tidyverse)
+library(nycflights13)
+
+```
+
+## Tibbles vs Data Frames
+
+```{r}
+class(mtcars)
+cars.tib <- mtcars |>
+  rownames_to_column() |> 
+  as_tibble() |> 
+  rename(model = rowname)
+  
+cars.tib
+class(cars.tib)
+typeof(cars.tib)
+  
+```
