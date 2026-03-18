@@ -1,0 +1,31 @@
+{
+    "id": "43D0E831",
+    "path": "/cloud/project/Course folder /M03/Peoples, Aiyon w07-data-wrangling-sec2.Rmd",
+    "project_path": "Course folder /M03/Peoples, Aiyon w07-data-wrangling-sec2.Rmd",
+    "type": "r_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1772666108358.0,
+    "source_on_save": false,
+    "relative_order": 7,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "12,21",
+        "scrollLine": "0",
+        "rmdVisualMode": "false",
+        "rmdVisualCollapsedChunks": "",
+        "rmdVisualModeLocation": "1285:590",
+        "rmdVisualWrapConfigured": "true",
+        "docOutlineVisible": "1"
+    },
+    "folds": "57|6|68|0|\n",
+    "lastKnownWriteTime": 1773269147,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1773269147327,
+    "read_only": false,
+    "read_only_alternatives": []
+}

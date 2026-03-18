@@ -1,0 +1,181 @@
+"""
+data_wrangler.py
+----------------
+Demonstrates pandas-based data cleaning, transformation,
+and reshaping techniques — mirroring real Advanced Data Wrangling workflows.
+"""
+
+import pandas as pd
+import numpy as np
+import re
+from io import StringIO
+
+
+# ── Sample Dirty Dataset ──────────────────────────────────────────────────────
+
+RAW_CSV = """
+id,name,email,revenue,signup_date,country,plan
+1,  alice johnson ,alice@example.com,1200.50,2023-01-15,USA,Pro
+2,BOB SMITH,bob@,850,15/02/2023,United States,pro
+3,Carol White,carol@example.com,,2023-03-20,US,ENTERPRISE
+4,dave brown,dave@example.com,2400.00,2023-04-10,Canada,enterprise
+5,,noname@example.com,300.25,2023-05-05,CA,Free
+6,Eve Davis,eve@example.com,-50,bad-date,Mexico,free
+7,Frank Lee,frank@example.com,999.99,2023-07-22,MX,Pro
+8,Grace Kim,grace@example.com,1500,2023-08-18,South Korea,pro
+"""
+
+
+# ── Step 1: Load ──────────────────────────────────────────────────────────────
+
+def load_raw(csv_string: str) -> pd.DataFrame:
+    """Load from CSV string, stripping leading/trailing whitespace from all cells."""
+    df = pd.read_csv(StringIO(csv_string.strip()))
+    df.columns = df.columns.str.strip().str.lower()
+    df = df.apply(lambda col: col.str.strip() if col.dtype == "object" else col)
+    return df
+
+
+# ── Step 2: Standardise ───────────────────────────────────────────────────────
+
+COUNTRY_MAP = {
+    "usa": "United States",
+    "us":  "United States",
+    "united states": "United States",
+    "ca":  "Canada",
+    "canada": "Canada",
+    "mx":  "Mexico",
+    "mexico": "Mexico",
+    "south korea": "South Korea",
+}
+
+PLAN_MAP = {
+    "free":       "Free",
+    "pro":        "Pro",
+    "enterprise": "Enterprise",
+}
+
+
+def standardise(df: pd.DataFrame) -> pd.DataFrame:
+    """Normalise casing, fix country aliases, and unify plan labels."""
+    df = df.copy()
+
+    # Name → title case; drop rows where name is blank
+    df["name"] = df["name"].str.title()
+    df = df[df["name"].notna() & (df["name"] != "")]
+
+    # Country normalisation
+    df["country"] = (
+        df["country"]
+        .str.lower()
+        .map(COUNTRY_MAP)
+        .fillna(df["country"])   # keep original if not in map
+    )
+
+    # Plan normalisation
+    df["plan"] = df["plan"].str.lower().map(PLAN_MAP).fillna("Unknown")
+
+    return df
+
+
+# ── Step 3: Parse & Validate ─────────────────────────────────────────────────
+
+DATE_FMTS = ["%Y-%m-%d", "%d/%m/%Y"]
+
+
+def parse_date(val: str) -> pd.Timestamp | None:
+    """Try multiple date formats; return NaT on failure."""
+    for fmt in DATE_FMTS:
+        try:
+            return pd.to_datetime(val, format=fmt)
+        except (ValueError, TypeError):
+            pass
+    return pd.NaT
+
+
+def validate(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    - Parse dates with multi-format support
+    - Coerce revenue to numeric; flag negatives as NaN
+    - Validate email format
+    - Report rows with critical nulls
+    """
+    df = df.copy()
+
+    # Dates
+    df["signup_date"] = df["signup_date"].apply(parse_date)
+
+    # Revenue: coerce, then null-out negatives
+    df["revenue"] = pd.to_numeric(df["revenue"], errors="coerce")
+    df.loc[df["revenue"] < 0, "revenue"] = np.nan
+
+    # Email validation (simple regex)
+    email_re = re.compile(r"^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$")
+    df["email_valid"] = df["email"].apply(
+        lambda e: bool(email_re.match(str(e))) if pd.notna(e) else False
+    )
+
+    return df
+
+
+# ── Step 4: Enrich ────────────────────────────────────────────────────────────
+
+def enrich(df: pd.DataFrame) -> pd.DataFrame:
+    """Add derived columns: revenue tier, days since signup, lifetime value bucket."""
+    df = df.copy()
+    today = pd.Timestamp("2024-01-01")   # fixed reference date for reproducibility
+
+    df["days_since_signup"] = (today - df["signup_date"]).dt.days
+
+    # Revenue tier
+    bins   = [-np.inf, 0,  500, 1500, np.inf]
+    labels = ["No Revenue", "Low", "Mid", "High"]
+    df["revenue_tier"] = pd.cut(df["revenue"], bins=bins, labels=labels)
+
+    return df
+
+
+# ── Step 5: Reshape ───────────────────────────────────────────────────────────
+
+def pivot_plan_country(df: pd.DataFrame) -> pd.DataFrame:
+    """Pivot to show revenue total by plan × country."""
+    return (
+        df.pivot_table(
+            values="revenue",
+            index="country",
+            columns="plan",
+            aggfunc="sum",
+            fill_value=0,
+        )
+        .round(2)
+    )
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+def main():
+    print("── Data Wrangler ─────────────────────────────────\n")
+
+    raw = load_raw(RAW_CSV)
+    print(f"Raw shape:  {raw.shape}")
+
+    clean = validate(standardise(raw))
+    rich  = enrich(clean)
+
+    print(f"Clean shape: {rich.shape}\n")
+    print("Cleaned Dataset:")
+    print(rich[["name", "plan", "country", "revenue", "revenue_tier", "email_valid"]].to_string(index=False))
+
+    print("\nRevenue Pivot (Country × Plan):")
+    print(pivot_plan_country(rich).to_string())
+
+    issues = rich[rich[["revenue", "signup_date"]].isna().any(axis=1)]
+    if not issues.empty:
+        print(f"\n⚠ {len(issues)} row(s) with data quality issues:")
+        print(issues[["id", "name", "revenue", "signup_date"]].to_string(index=False))
+
+    print("\n── Done ──────────────────────────────────────────")
+
+
+if __name__ == "__main__":
+    main()

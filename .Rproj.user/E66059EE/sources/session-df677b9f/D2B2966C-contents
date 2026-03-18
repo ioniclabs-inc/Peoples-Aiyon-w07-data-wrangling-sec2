@@ -1,0 +1,41 @@
+---
+title: "Peoples, Aiyon- DS-L01-2-Rmd_Principle"
+date: '`r format(Sys.time())`'
+output: 
+  html_document:
+    code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+    highlight: espresso
+    theme: journal
+    number_sections: yes
+---
+
+```{r}
+# Define variables
+x <- 1:10
+y <- x^2
+
+# Generate plot
+plot(x, y, main = "Simple Plot")
+library(ggplot2)
+
+# Create sample data
+sample_data <- data.frame(
+  category = rep(c("A", "B", "C"), each = 30),
+  value = c(rnorm(30, 10, 2), rnorm(30, 15, 3), rnorm(30, 12, 2))
+)
+
+# Inspect the structure
+head(sample_data)
+
+ggplot(sample_data, aes(x = category, y = value, fill = category)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Values by Category",
+       x = "Category",
+       y = "Value") +
+  theme_minimal()
+
+```

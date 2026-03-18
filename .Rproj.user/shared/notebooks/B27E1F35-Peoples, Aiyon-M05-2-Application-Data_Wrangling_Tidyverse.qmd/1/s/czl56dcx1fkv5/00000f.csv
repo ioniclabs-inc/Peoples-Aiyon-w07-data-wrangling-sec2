@@ -1,0 +1,2 @@
+"0","# --- Base R: Subset entire row ---"
+"0","air.tib[air.tib$Temp == 97, ]"

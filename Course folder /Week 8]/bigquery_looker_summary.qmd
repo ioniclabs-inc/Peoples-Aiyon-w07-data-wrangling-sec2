@@ -1,0 +1,159 @@
+---
+title: "Data Analytics with Google Cloud BigQuery and Looker Studio"
+subtitle: "LinkedIn Learning Training Summary"
+author: "Ion Peoples"
+date: today
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    toc-title: "Contents"
+    embed-resources: true
+    code-tools: true
+    code-fold: true
+---
+
+## Overview
+
+This report summarizes my completion of the LinkedIn Learning course *Data Analytics with Google Cloud BigQuery and Looker Studio*. The training covered cloud-based data querying using BigQuery and visual reporting through Looker Studio, with hands-on exercises following the instructor's workflow throughout.
+
+---
+
+## Section 1: Introduction to Google Cloud BigQuery
+
+### What is BigQuery?
+
+BigQuery is Google Cloud's fully managed, serverless data warehouse designed for large-scale analytics. It allows users to run SQL queries on massive datasets without managing any infrastructure.
+
+### Key Concepts Covered
+
+- **Projects, Datasets, and Tables** — The three-level hierarchy that organizes data in BigQuery.
+- **BigQuery Sandbox** — A free tier that allows exploration without billing setup.
+- **Public Datasets** — Pre-loaded datasets available for practice queries.
+
+### What I Learned
+
+> *(Add your personal notes here — what stood out, what was new, any "aha" moments from this section.)*
+
+---
+
+## Section 2: Writing SQL Queries in BigQuery
+
+### Basic Query Structure
+
+BigQuery uses standard SQL syntax. A typical query follows the structure:
+
+```sql
+SELECT column_name
+FROM `project.dataset.table`
+WHERE condition
+LIMIT 100;
+```
+
+### Key Skills Practiced
+
+- Writing `SELECT`, `WHERE`, `GROUP BY`, and `ORDER BY` clauses
+- Using aggregate functions like `COUNT()`, `SUM()`, and `AVG()`
+- Filtering and transforming data with `CASE WHEN` statements
+- Joining multiple tables with `JOIN`
+
+### What I Learned
+
+> *(Describe the queries you ran, any interesting patterns in the data, or techniques the instructor used that you want to remember.)*
+
+---
+
+## Section 3: Data Exploration and Cleaning in BigQuery
+
+### Working with Real Datasets
+
+The instructor demonstrated how to explore unfamiliar datasets before building reports — checking for nulls, understanding data types, and previewing row counts.
+
+### Useful Functions
+
+| Function | Purpose |
+|----------|---------|
+| `COUNTIF` | Count rows matching a condition |
+| `CAST` | Convert data types |
+| `FORMAT_DATE` | Reformat date fields |
+| `IFNULL` | Replace null values |
+
+### What I Learned
+
+> *(Note anything about data quality issues, how the instructor handled them, or cleaning strategies you want to apply in future projects.)*
+
+---
+
+## Section 4: Connecting BigQuery to Looker Studio
+
+### What is Looker Studio?
+
+Looker Studio (formerly Google Data Studio) is a free, browser-based tool for creating interactive dashboards and reports. It connects directly to BigQuery as a live data source.
+
+### Connection Workflow
+
+1. Open [Looker Studio](https://lookerstudio.google.com)
+2. Create a new report → Add data source
+3. Select **BigQuery** as the connector
+4. Choose your project, dataset, and table
+5. Begin building visualizations
+
+### What I Learned
+
+> *(Describe the connection process, any authorization steps, and how the data appeared once loaded into Looker Studio.)*
+
+---
+
+## Section 5: Building Dashboards in Looker Studio
+
+### Chart Types Used
+
+- **Bar/Column Charts** — Comparing categories
+- **Time Series Charts** — Tracking trends over time
+- **Scorecards** — Displaying single key metrics
+- **Tables** — Showing raw or aggregated data
+
+### Dashboard Design Principles
+
+- Use consistent color schemes tied to the data story
+- Add filters and date range controls for interactivity
+- Label axes and add chart titles for clarity
+- Group related charts by theme or audience question
+
+### What I Learned
+
+> *(Walk through the dashboard you built with the instructor — what metrics did you visualize, what filters did you add, and what story does the data tell?)*
+
+---
+
+## Section 6: Key Takeaways
+
+Here are the most valuable skills and concepts I'm taking away from this training:
+
+1. **BigQuery is extremely fast** — Even complex queries on large datasets return results in seconds thanks to Google's distributed infrastructure.
+2. **SQL is the foundation** — Strong SQL skills directly translate to BigQuery; almost no new syntax is required to get started.
+3. **Looker Studio lowers the barrier to insight** — Non-technical stakeholders can interact with live dashboards without touching any code.
+4. **The BigQuery → Looker Studio pipeline is seamless** — The two tools are tightly integrated, making it easy to go from raw data to a polished report.
+5. **Cloud analytics scales with the problem** — Unlike local tools, there's no data size limit to worry about.
+
+---
+
+## Certification
+
+Upon completing the course, I was issued the following LinkedIn Learning certificate:
+
+> *(Replace the placeholder below with your actual screenshot. Save your image file in the same folder as this `.qmd` file, then update the filename in the code below.)*
+
+```{r}
+#| echo: false
+#| out-width: "80%"
+#| fig-align: "center"
+#| fig-cap: "LinkedIn Learning Certificate — Data Analytics with Google Cloud BigQuery and Looker Studio"
+
+knitr::include_graphics("certificate.png")  # <-- Replace with your actual filename
+```
+
+---
+
+*Report prepared by Ion Peoples | IBM 4121.01 — International Marketing Research | Prof. Ishihara*

@@ -1,0 +1,6 @@
+"0","# Define variables"
+"0","x <- 1:10"
+"0","y <- x^2"
+"0",""
+"0","# Generate plot"
+"0","plot(x, y, main = ""Simple Plot"")"

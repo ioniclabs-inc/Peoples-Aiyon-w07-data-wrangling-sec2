@@ -1,0 +1,8 @@
+"0","avg_delay_by_month <- flights |> "
+"0","  group_by(year, month, day) |> "
+"0","  slice_max(order_by = arr_delay, n = 10, na_rm = TRUE) |> "
+"0","  ungroup() |> "
+"0","  group_by(month) |> "
+"0","  summarize(avg_delay = mean(arr_delay, na.rm = TRUE), .groups = ""drop"")"
+"0",""
+"0","avg_delay_by_month"

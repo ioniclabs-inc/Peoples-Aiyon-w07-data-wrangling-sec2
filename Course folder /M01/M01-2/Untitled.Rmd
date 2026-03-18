@@ -1,0 +1,74 @@
+---
+title: "Peoples,Aiyon-M01-2-Intro_Literate_programming-Application"
+author: "Aiyon Peoples"
+date: '`r format(Sys.time())`'
+format: 
+  html: 
+    toc: true
+    toc-depth: 4
+    number-sections: true
+    code-line-numbers: true
+    code-fold: false
+    code-link: true
+    embed-resources: true
+editor: visual
+  markdown: 
+    wrap: 72
+execute: 
+  freeze: auto
+  warning: false
+---
+
+# Assigning text to variable X
+
+X \<- "This is my first assignment" X \# (1) Examples from help(paste) paste(1:12) paste("A", 1:6, sep = "-")
+
+# (2) Appending text to X
+
+X \<- paste(X, "and I'm loving it!") X
+
+# Exercise 3:Create a vector called Y with the numbers 2, 3, 4, and 5. Multiply the vector by 2.
+
+Y \<- c(2, 3, 4, 5) Y \<- Y \* 2 Y
+
+# Exercise 4: Print both X and Y.
+
+print(X) print(Y)
+
+# Exercise 5: Show the maximum and the minimum value of vector Y.
+
+min(Y) max(Y)
+
+# Exercise 6: Load ggplot2 and view the economics data.
+
+## 
+
+install.packages("ggplot2") \# Uncomment if not installed library(ggplot2) head(economics)
+
+# Exercise 7: Define variables and create a plot using labs().
+
+# Plotting Unemployed vs. Population
+
+plot \<- ggplot(data = economics, aes(x = pop, y = unemploy)) + geom_point()
+
+plot + labs(title = "US Unemployment vs. Population Growth", x = "Total Population (thousands)", y = "Number of Unemployed (thousands)")
+
+#Eercise 8: Replicate the chart using a pipe operator and cross-referencing.
+
+#| label: fig-econ-plot
+#| fig-cap: "Scatterplot showing the correlation between population size and unemployment numbers."
+#| fig-width: 5
+#| fig-asp: 0.6
+
+economics |> 
+  ggplot(aes(x = pop, y = unemploy)) +
+  geom_point() +
+  labs(title = "US Unemployment vs. Population Growth (Piped)",
+       x = "Total Population (thousands)",
+       y = "Number of Unemployed (thousands)")
+
+#Exercise 9 Callout
+::: {.callout-note}
+As seen in @fig-econ-plot, there is a general upward trend between population growth and unemployment, though significant fluctuations exist during specific economic cycles.
+:::       
+

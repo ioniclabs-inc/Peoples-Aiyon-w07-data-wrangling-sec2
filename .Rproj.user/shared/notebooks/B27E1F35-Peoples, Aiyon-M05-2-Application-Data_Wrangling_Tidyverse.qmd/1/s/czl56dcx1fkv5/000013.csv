@@ -1,0 +1,5 @@
+"0",""
+"0","# --- Tidyverse: Pinpoint Ozone element only ---"
+"0","air.tib |> "
+"0","  filter(Temp == 97) |> "
+"0","  select(Ozone)"

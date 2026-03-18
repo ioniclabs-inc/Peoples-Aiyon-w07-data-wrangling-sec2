@@ -1,0 +1,6 @@
+"0","# Count missing values and percentage"
+"0","air.tib |> "
+"0","  summarize("
+"0","    missing_count   = sum(is.na(Solar.R)),"
+"0","    missing_percent = mean(is.na(Solar.R)) * 100"
+"0","  )"

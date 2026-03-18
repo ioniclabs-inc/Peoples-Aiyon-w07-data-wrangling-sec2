@@ -1,0 +1,130 @@
+---
+title: "How to create a reproducible reporting HTML file using Rmd file"
+author: "Aiyon Peopels"
+date: '`r format(Sys.time())`'
+output: 
+  html_document:
+    code_folding: show
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+    highlight: espresso
+    theme: journal
+    number_sections: yes
+---
+
+`{r} {r setup. include=FALSE} knitr:: opts_chunk$set(echo = TRUE)`
+
+# R Markdown
+
+R Markdown is a format for writing reproducible, dynamic reports with R. Use it to embed R code and results into slideshows, pdfs, html documents, Word files and more.
+
+# Structure
+
+1.  YAML Header
+2.  Text Area
+3.  Code chunk
+
+# Workfolow
+
+1.  Open - Open a file that uses the .Rmd extension.
+2.  Write - Write content with the easy to use R Markdown syntax
+3.  Embed - Embed R code that creates output to include in the report
+4.  Render - Replace R code with its output and transform the report into a slideshow, pdf, html or ms Word file.
+
+# Text Area Formatting Tools:
+
+Plain text End a line with two spaces to start a new paragraph *italics* and *italics* **bold** and **bold** superscript^2^
+
+~~strikethrough~~ Hyperlink: [CCIDM](https://www.cpp.edu/cba/customer-insights-lab/index.shtml)
+
+# Header 1
+
+## Header 2
+
+### Header 3
+
+#### Header 4
+
+##### Header 5
+
+###### Header 6
+
+endash: -- emdash: --- inline equation: $A = \pi*r^2$ slide break:
+
+------------------------------------------------------------------------
+
+> Block quote
+
+1.  Ordered list 1
+2.  Ordered list 2
+    -   sub-item 1
+    -   sub-item 2
+
+| Table Header | Second Header |
+|-------------:|:--------------|
+|   Table Cell | Cell 2        |
+|       Cell 3 | Cell 4        |
+
+------------------------------------------------------------------------
+
+# YAML Header
+>
+A YAML header is a set of key: value pairs at the start of your file. Begin and
+end the header with a line of three dashes (---). (From the Rmd cheatsheet
+<https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf>)
+
+You will notice that *my YAML header* is different from the default one Rmd file
+automatically created. That is because I customized output option as above. This
+setting dictates how your html file that will be knitted will look like.
+
+- **date**: '`r format(Sys.time())`'
+  - This allows to print the current time each time you knit the file.
+    - can be customized in a various ways
+      + date-time: '`r Sys.time()`'
+      + Day, Month, date, Year (Tuesday, Feb: '`r format(Sys.time(), "%A, %B, 
+%d, %Y")`'
+      + m/d/Y (10/15/2023): '`r format(Sys.time(), "%m/%d/%Y")`'
+
+***
+***
+
+- **toc**: yes
+  - I turned the table of contents on. This will have hyperlinks in HTML and allow
+readers to navigate to the desired sections faster.
+- **toc_depth**: 4
+  - I want to see up to four levels of headings
+- **toc_float**: true
+  - adding this move toc from the front end of the document to a left side floating when
+you scroll it down.
+  - By default, the floating toc headings are collapsed, not showing all headings. We
+can turn it off using the following.
+    ```
+    toc_float:
+      collapsed: false
+    ```
+- **highlight**: espresso
+  - I want to see "espresso" style: black background of codes area.
+- **theme**: journal
+  - journal style. Choose the style you like.
+- **number_sections**: yes
+  - Turned on automatic section numbering, which is why I didn't add numbering manually
+below.
+  - Notice how this will nicely turn your HTML report much more organized.
+  - Try this and other options and see which one you like the most in
+  your HTML file.
+
+# Embed Codes
+
+## Code chunk
+
+### Sample
+
+* Ctl + alt + I
+
+```{r}
+# use ctl + Enter simultaneous to execute a line
+
+# install.packages("tidyverse")
+library(tidyverse)

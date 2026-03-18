@@ -1,0 +1,4 @@
+"0","ggplot(df_frosh_relabeled, aes(x = ACT, y = attend, color = frosh)) +"
+"0","  geom_point() +"
+"0","  geom_smooth(method = ""lm"", se = FALSE) +"
+"0","  facet_wrap(~frosh)"

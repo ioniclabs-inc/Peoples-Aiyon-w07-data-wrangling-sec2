@@ -1,0 +1,3 @@
+"0","# Convert airquality to tibble"
+"0","air.tib <- as_tibble(airquality)"
+"0","air.tib"

@@ -1,0 +1,7 @@
+"0","# Using nycflights13: join flights with airline names"
+"0","flights_named <- flights |>"
+"0","  left_join(airlines, by = ""carrier"") |>"
+"0","  select(year, month, day, carrier, name, dep_delay, arr_delay) |>"
+"0","  rename(airline = name)"
+"0",""
+"0","head(flights_named, 5)"

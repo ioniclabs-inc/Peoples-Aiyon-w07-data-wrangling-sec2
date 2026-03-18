@@ -1,0 +1,6 @@
+"0","mba_sep <- mba |> "
+"0","  separate(stats,"
+"0","           into = c(""points"", ""assists"", ""steals""),"
+"0","           sep = ""/"")"
+"0",""
+"0","mba_sep"

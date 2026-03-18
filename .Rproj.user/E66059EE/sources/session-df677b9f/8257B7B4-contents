@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>iON — Python Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Fira+Code:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow-night.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<style>
+:root {
+  --bg:       #0b0c0e;
+  --surface:  #131518;
+  --border:   #1f2227;
+  --lime:     #c9ff47;
+  --lime-dim: #8ab52e;
+  --text:     #e8eaf0;
+  --muted:    #6b7280;
+  --red:      #ff5f57;
+  --yellow:   #febc2e;
+  --green:    #28c840;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Noise overlay ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.4;
+}
+
+/* ── Header ── */
+header {
+  position: relative;
+  padding: 4rem 5vw 3rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+header::after {
+  content: 'PYTHON';
+  position: absolute;
+  right: -1rem; top: -1.5rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(6rem, 16vw, 14rem);
+  font-weight: 900;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(201,255,71,0.07);
+  pointer-events: none;
+  line-height: 1;
+  user-select: none;
+}
+.brand {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.brand span { color: var(--lime); }
+.tagline {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.5rem;
+  letter-spacing: 0.05em;
+}
+.skills-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+.skill-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.7rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+}
+.skill-tag.active {
+  border-color: var(--lime);
+  color: var(--lime);
+  background: rgba(201,255,71,0.06);
+}
+
+/* ── Nav tabs ── */
+nav {
+  display: flex;
+  gap: 0;
+  padding: 0 5vw;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 1.2rem 1.8rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+  letter-spacing: 0.04em;
+  position: relative;
+}
+.tab:hover { color: var(--text); }
+.tab.active {
+  color: var(--lime);
+  border-bottom-color: var(--lime);
+}
+.tab .dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  position: relative; top: -1px;
+}
+.tab.active .dot { background: var(--lime); box-shadow: 0 0 6px var(--lime); }
+
+/* ── Main layout ── */
+main {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  min-height: calc(100vh - 200px);
+}
+@media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+
+/* ── Sidebar ── */
+aside {
+  border-right: 1px solid var(--border);
+  padding: 2rem;
+  position: sticky;
+  top: 0;
+  height: fit-content;
+  max-height: 100vh;
+  overflow-y: auto;
+}
+.project-meta { margin-bottom: 2rem; }
+.meta-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+.meta-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+.meta-value.highlight { color: var(--lime); }
+
+.concept-section { margin-top: 1.5rem; }
+.concept-title {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+.concept-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text);
+  opacity: 0.8;
+}
+.concept-item::before {
+  content: '›';
+  color: var(--lime);
+  flex-shrink: 0;
+  font-family: 'Fira Code', monospace;
+}
+
+.run-block {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(201,255,71,0.04);
+  border: 1px solid rgba(201,255,71,0.15);
+  border-radius: 4px;
+}
+.run-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: var(--lime-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.run-cmd {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: var(--lime);
+}
+.run-cmd::before { content: '$ '; color: var(--muted); }
+
+/* ── Code panel ── */
+.code-panel {
+  display: none;
+  flex-direction: column;
+}
+.code-panel.active { display: flex; }
+
+/* ── Terminal chrome ── */
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.5rem;
+  background: #1a1c1f;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.traffic-lights { display: flex; gap: 6px; }
+.tl {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+.tl.red    { background: var(--red); }
+.tl.yellow { background: var(--yellow); }
+.tl.green  { background: var(--green); }
+.terminal-filename {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-left: auto;
+  letter-spacing: 0.04em;
+}
+.copy-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  padding: 0.25rem 0.65rem;
+  cursor: pointer;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+}
+.copy-btn:hover { border-color: var(--lime); color: var(--lime); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+/* ── Code block ── */
+.code-scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+}
+.code-scroll pre {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background: var(--surface) !important;
+  padding: 1.5rem !important;
+  font-family: 'Fira Code', monospace !important;
+  font-size: 0.82rem !important;
+  line-height: 1.7 !important;
+  tab-size: 4;
+}
+.hljs { background: var(--surface) !important; }
+.hljs-comment { color: #4a5568 !important; font-style: italic; }
+.hljs-keyword { color: #c9ff47 !important; }
+.hljs-string  { color: #68d391 !important; }
+.hljs-number  { color: #f6ad55 !important; }
+.hljs-built_in { color: #90cdf4 !important; }
+.hljs-title    { color: #b794f4 !important; }
+.hljs-decorator { color: #fc8181 !important; }
+
+/* ── Stats row ── */
+.stats-row {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: #0f1012;
+}
+.stat {
+  flex: 1;
+  padding: 0.8rem 1.5rem;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.stat:last-child { border-right: none; }
+.stat-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--lime);
+  display: block;
+}
+.stat-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: block;
+  margin-top: 0.1rem;
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+header, nav, main {
+  animation: fadeUp 0.5s ease both;
+}
+nav { animation-delay: 0.1s; }
+main { animation-delay: 0.2s; }
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 5vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+footer span {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+footer .brand-sm {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--lime);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand">i<span>ON</span> PEOPLES</div>
+    <div class="tagline">// python portfolio · marketing × data × automation</div>
+  </div>
+  <div class="skills-bar">
+    <span class="skill-tag active">pandas</span>
+    <span class="skill-tag active">numpy</span>
+    <span class="skill-tag active">dataclasses</span>
+    <span class="skill-tag active">pathlib</span>
+    <span class="skill-tag active">hashlib</span>
+    <span class="skill-tag active">argparse</span>
+    <span class="skill-tag active">urllib</span>
+    <span class="skill-tag active">regex</span>
+    <span class="skill-tag active">logging</span>
+    <span class="skill-tag active">OOP</span>
+    <span class="skill-tag active">type hints</span>
+    <span class="skill-tag active">JSON I/O</span>
+  </div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="switchTab(0)">
+    <span class="dot"></span>funnel_analytics.py
+  </div>
+  <div class="tab" onclick="switchTab(1)">
+    <span class="dot"></span>data_wrangler.py
+  </div>
+  <div class="tab" onclick="switchTab(2)">
+    <span class="dot"></span>api_client.py
+  </div>
+  <div class="tab" onclick="switchTab(3)">
+    <span class="dot"></span>file_organizer.py
+  </div>
+</nav>
+
+<main>
+  <aside id="sidebar"></aside>
+
+  <div style="display:flex;flex-direction:column;overflow:hidden;">
+
+    <!-- Panel 0 -->
+    <div class="code-panel active" id="panel-0">
+      <div class="stats-row">
+        <div class="stat"><span class="stat-num">500</span><span class="stat-label">simulated users</span></div>
+        <div class="stat"><span class="stat-num">5</span><span class="stat-label">funnel stages</span></div>
+        <div class="stat"><span class="stat-num">5</span><span class="stat-label">channels ranked</span></div>
+        <div class="stat"><span class="stat-num">JSON</span><span class="stat-label">output format</span></div>
+      </div>
+      <div class="terminal-header">
+        <div class="traffic-lights"><div class="tl red"></div><div class="tl yellow"></div><div class="tl green"></div></div>
+        <span class="terminal-filename">funnel_analytics.py</span>
+        <button class="copy-btn" onclick="copyCode(0, this)">copy</button>
+      </div>
+      <div class="code-scroll"><pre><code class="language-python" id="code-0"></code></pre></div>
+    </div>
+
+    <!-- Panel 1 -->
+    <div class="code-panel" id="panel-1">
+      <div class="stats-row">
+        <div class="stat"><span class="stat-num">5</span><span class="stat-label">cleaning steps</span></div>
+        <div class="stat"><span class="stat-num">regex</span><span class="stat-label">email validation</span></div>
+        <div class="stat"><span class="stat-num">pivot</span><span class="stat-label">table reshape</span></div>
+        <div class="stat"><span class="stat-num">NaN</span><span class="stat-label">quality audit</span></div>
+      </div>
+      <div class="terminal-header">
+        <div class="traffic-lights"><div class="tl red"></div><div class="tl yellow"></div><div class="tl green"></div></div>
+        <span class="terminal-filename">data_wrangler.py</span>
+        <button class="copy-btn" onclick="copyCode(1, this)">copy</button>
+      </div>
+      <div class="code-scroll"><pre><code class="language-python" id="code-1"></code></pre></div>
+    </div>
+
+    <!-- Panel 2 -->
+    <div class="code-panel" id="panel-2">
+      <div class="stats-row">
+        <div class="stat"><span class="stat-num">4</span><span class="stat-label">cities fetched</span></div>
+        <div class="stat"><span class="stat-num">3×</span><span class="stat-label">retry logic</span></div>
+        <div class="stat"><span class="stat-num">OOP</span><span class="stat-label">data models</span></div>
+        <div class="stat"><span class="stat-num">live</span><span class="stat-label">REST API</span></div>
+      </div>
+      <div class="terminal-header">
+        <div class="traffic-lights"><div class="tl red"></div><div class="tl yellow"></div><div class="tl green"></div></div>
+        <span class="terminal-filename">api_client.py</span>
+        <button class="copy-btn" onclick="copyCode(2, this)">copy</button>
+      </div>
+      <div class="code-scroll"><pre><code class="language-python" id="code-2"></code></pre></div>
+    </div>
+
+    <!-- Panel 3 -->
+    <div class="code-panel" id="panel-3">
+      <div class="stats-row">
+        <div class="stat"><span class="stat-num">SHA-256</span><span class="stat-label">dedup hash</span></div>
+        <div class="stat"><span class="stat-num">7</span><span class="stat-label">file categories</span></div>
+        <div class="stat"><span class="stat-num">CLI</span><span class="stat-label">argparse</span></div>
+        <div class="stat"><span class="stat-num">JSON</span><span class="stat-label">audit report</span></div>
+      </div>
+      <div class="terminal-header">
+        <div class="traffic-lights"><div class="tl red"></div><div class="tl yellow"></div><div class="tl green"></div></div>
+        <span class="terminal-filename">file_organizer.py</span>
+        <button class="copy-btn" onclick="copyCode(3, this)">copy</button>
+      </div>
+      <div class="code-scroll"><pre><code class="language-python" id="code-3"></code></pre></div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <span class="brand-sm">iON</span>
+  <span>4 scripts · python 3.11+ · marketing &amp; data focus</span>
+  <span>ion peoples — 2025</span>
+</footer>
+
+<script>
+// ── Code content ───────────────────────────────────────────────────────────
+const CODE = {"funnel_analytics.py": "&quot;&quot;&quot;\nfunnel_analytics.py\n-------------------\nMarketing funnel analysis pipeline using pandas.\nIngests raw event data, computes conversion rates at each\nfunnel stage, and outputs a ranked channel performance summary.\n&quot;&quot;&quot;\n\nimport pandas as pd\nimport json\nfrom datetime import datetime, timedelta\nimport random\n\n\n# ── Synthetic Data Generator ──────────────────────────────────────────────────\n\ndef generate_event_data(n: int = 500, seed: int = 42) -&gt; pd.DataFrame:\n    &quot;&quot;&quot;Create a synthetic user-event dataset that mirrors GA4 export structure.&quot;&quot;&quot;\n    random.seed(seed)\n\n    channels   = [&quot;Organic Search&quot;, &quot;Paid Social&quot;, &quot;Email&quot;, &quot;Direct&quot;, &quot;Referral&quot;]\n    stages     = [&quot;impression&quot;, &quot;click&quot;, &quot;add_to_cart&quot;, &quot;checkout&quot;, &quot;purchase&quot;]\n    drop_rates = [0.55, 0.40, 0.30, 0.15]   # probability of dropping at each stage\n\n    records = []\n    base_date = datetime(2024, 1, 1)\n\n    for user_id in range(1, n + 1):\n        channel = random.choice(channels)\n        event_date = base_date + timedelta(days=random.randint(0, 89))\n\n        for i, stage in enumerate(stages):\n            records.append({\n                &quot;user_id&quot;:    user_id,\n                &quot;channel&quot;:    channel,\n                &quot;stage&quot;:      stage,\n                &quot;event_date&quot;: event_date,\n            })\n            # Apply probabilistic drop-off so not every user reaches purchase\n            if i &lt; len(drop_rates) and random.random() &lt; drop_rates[i]:\n                break\n\n    return pd.DataFrame(records)\n\n\n# ── Funnel Computation ────────────────────────────────────────────────────────\n\ndef compute_funnel(df: pd.DataFrame) -&gt; pd.DataFrame:\n    &quot;&quot;&quot;\n    For each funnel stage, count unique users who reached it.\n    Returns a DataFrame with absolute counts and step-over-step conversion rates.\n    &quot;&quot;&quot;\n    stages = [&quot;impression&quot;, &quot;click&quot;, &quot;add_to_cart&quot;, &quot;checkout&quot;, &quot;purchase&quot;]\n\n    stage_counts = (\n        df.groupby(&quot;stage&quot;)[&quot;user_id&quot;]\n        .nunique()\n        .reindex(stages)\n        .reset_index()\n        .rename(columns={&quot;user_id&quot;: &quot;users&quot;})\n    )\n\n    stage_counts[&quot;conversion_rate&quot;] = (\n        stage_counts[&quot;users&quot;] / stage_counts[&quot;users&quot;].iloc[0] * 100\n    ).round(2)\n\n    stage_counts[&quot;step_over_step&quot;] = (\n        stage_counts[&quot;users&quot;].pct_change() * 100\n    ).round(2)\n\n    return stage_counts\n\n\n# ── Channel Performance ───────────────────────────────────────────────────────\n\ndef channel_performance(df: pd.DataFrame) -&gt; pd.DataFrame:\n    &quot;&quot;&quot;\n    Compute per-channel purchase conversion rate and rank channels.\n    A &#x27;purchase conversion rate&#x27; = purchasers / first-touch impressions per channel.\n    &quot;&quot;&quot;\n    impressions = (\n        df[df[&quot;stage&quot;] == &quot;impression&quot;]\n        .groupby(&quot;channel&quot;)[&quot;user_id&quot;]\n        .nunique()\n        .rename(&quot;impressions&quot;)\n    )\n    purchases = (\n        df[df[&quot;stage&quot;] == &quot;purchase&quot;]\n        .groupby(&quot;channel&quot;)[&quot;user_id&quot;]\n        .nunique()\n        .rename(&quot;purchases&quot;)\n    )\n\n    perf = pd.concat([impressions, purchases], axis=1).fillna(0)\n    perf[&quot;conversion_pct&quot;] = (perf[&quot;purchases&quot;] / perf[&quot;impressions&quot;] * 100).round(2)\n    perf = perf.sort_values(&quot;conversion_pct&quot;, ascending=False).reset_index()\n    perf.index += 1   # rank starts at 1\n    return perf\n\n\n# ── Export ────────────────────────────────────────────────────────────────────\n\ndef export_summary(funnel: pd.DataFrame, channels: pd.DataFrame, path: str = &quot;funnel_report.json&quot;):\n    &quot;&quot;&quot;Serialize results to JSON for downstream use (e.g., Looker Studio, dashboard).&quot;&quot;&quot;\n    summary = {\n        &quot;generated_at&quot;: datetime.utcnow().isoformat() + &quot;Z&quot;,\n        &quot;funnel&quot;:       funnel.to_dict(orient=&quot;records&quot;),\n        &quot;channels&quot;:     channels.reset_index().to_dict(orient=&quot;records&quot;),\n    }\n    with open(path, &quot;w&quot;) as f:\n        json.dump(summary, f, indent=2)\n    print(f&quot;✓ Report saved → {path}&quot;)\n\n\n# ── Main ──────────────────────────────────────────────────────────────────────\n\ndef main():\n    print(&quot;── Funnel Analytics ──────────────────────────────&quot;)\n\n    df = generate_event_data(n=500)\n    print(f&quot;  Events loaded:  {len(df):,}&quot;)\n    print(f&quot;  Unique users:   {df[&#x27;user_id&#x27;].nunique():,}\\n&quot;)\n\n    funnel = compute_funnel(df)\n    print(&quot;  Funnel Overview:&quot;)\n    print(funnel.to_string(index=False))\n\n    print(&quot;\\n  Channel Performance (ranked):&quot;)\n    channels = channel_performance(df)\n    print(channels.to_string())\n\n    export_summary(funnel, channels)\n    print(&quot;\\n── Done ──────────────────────────────────────────&quot;)\n\n\nif __name__ == &quot;__main__&quot;:\n    main()\n", "data_wrangler.py": "&quot;&quot;&quot;\ndata_wrangler.py\n----------------\nDemonstrates pandas-based data cleaning, transformation,\nand reshaping techniques — mirroring real Advanced Data Wrangling workflows.\n&quot;&quot;&quot;\n\nimport pandas as pd\nimport numpy as np\nimport re\nfrom io import StringIO\n\n\n# ── Sample Dirty Dataset ──────────────────────────────────────────────────────\n\nRAW_CSV = &quot;&quot;&quot;\nid,name,email,revenue,signup_date,country,plan\n1,  alice johnson ,alice@example.com,1200.50,2023-01-15,USA,Pro\n2,BOB SMITH,bob@,850,15/02/2023,United States,pro\n3,Carol White,carol@example.com,,2023-03-20,US,ENTERPRISE\n4,dave brown,dave@example.com,2400.00,2023-04-10,Canada,enterprise\n5,,noname@example.com,300.25,2023-05-05,CA,Free\n6,Eve Davis,eve@example.com,-50,bad-date,Mexico,free\n7,Frank Lee,frank@example.com,999.99,2023-07-22,MX,Pro\n8,Grace Kim,grace@example.com,1500,2023-08-18,South Korea,pro\n&quot;&quot;&quot;\n\n\n# ── Step 1: Load ──────────────────────────────────────────────────────────────\n\ndef load_raw(csv_string: str) -&gt; pd.DataFrame:\n    &quot;&quot;&quot;Load from CSV string, stripping leading/trailing whitespace from all cells.&quot;&quot;&quot;\n    df = pd.read_csv(StringIO(csv_string.strip()))\n    df.columns = df.columns.str.strip().str.lower()\n    df = df.apply(lambda col: col.str.strip() if col.dtype == &quot;object&quot; else col)\n    return df\n\n\n# ── Step 2: Standardise ───────────────────────────────────────────────────────\n\nCOUNTRY_MAP = {\n    &quot;usa&quot;: &quot;United States&quot;,\n    &quot;us&quot;:  &quot;United States&quot;,\n    &quot;united states&quot;: &quot;United States&quot;,\n    &quot;ca&quot;:  &quot;Canada&quot;,\n    &quot;canada&quot;: &quot;Canada&quot;,\n    &quot;mx&quot;:  &quot;Mexico&quot;,\n    &quot;mexico&quot;: &quot;Mexico&quot;,\n    &quot;south korea&quot;: &quot;South Korea&quot;,\n}\n\nPLAN_MAP = {\n    &quot;free&quot;:       &quot;Free&quot;,\n    &quot;pro&quot;:        &quot;Pro&quot;,\n    &quot;enterprise&quot;: &quot;Enterprise&quot;,\n}\n\n\ndef standardise(df: pd.DataFrame) -&gt; pd.DataFrame:\n    &quot;&quot;&quot;Normalise casing, fix country aliases, and unify plan labels.&quot;&quot;&quot;\n    df = df.copy()\n\n    # Name → title case; drop rows where name is blank\n    df[&quot;name&quot;] = df[&quot;name&quot;].str.title()\n    df = df[df[&quot;name&quot;].notna() &amp; (df[&quot;name&quot;] != &quot;&quot;)]\n\n    # Country normalisation\n    df[&quot;country&quot;] = (\n        df[&quot;country&quot;]\n        .str.lower()\n        .map(COUNTRY_MAP)\n        .fillna(df[&quot;country&quot;])   # keep original if not in map\n    )\n\n    # Plan normalisation\n    df[&quot;plan&quot;] = df[&quot;plan&quot;].str.lower().map(PLAN_MAP).fillna(&quot;Unknown&quot;)\n\n    return df\n\n\n# ── Step 3: Parse &amp; Validate ─────────────────────────────────────────────────\n\nDATE_FMTS = [&quot;%Y-%m-%d&quot;, &quot;%d/%m/%Y&quot;]\n\n\ndef parse_date(val: str) -&gt; pd.Timestamp | None:\n    &quot;&quot;&quot;Try multiple date formats; return NaT on failure.&quot;&quot;&quot;\n    for fmt in DATE_FMTS:\n        try:\n            return pd.to_datetime(val, format=fmt)\n        except (ValueError, TypeError):\n            pass\n    return pd.NaT\n\n\ndef validate(df: pd.DataFrame) -&gt; pd.DataFrame:\n    &quot;&quot;&quot;\n    - Parse dates with multi-format support\n    - Coerce revenue to numeric; flag negatives as NaN\n    - Validate email format\n    - Report rows with critical nulls\n    &quot;&quot;&quot;\n    df = df.copy()\n\n    # Dates\n    df[&quot;signup_date&quot;] = df[&quot;signup_date&quot;].apply(parse_date)\n\n    # Revenue: coerce, then null-out negatives\n    df[&quot;revenue&quot;] = pd.to_numeric(df[&quot;revenue&quot;], errors=&quot;coerce&quot;)\n    df.loc[df[&quot;revenue&quot;] &lt; 0, &quot;revenue&quot;] = np.nan\n\n    # Email validation (simple regex)\n    email_re = re.compile(r&quot;^[\\w.+-]+@[\\w-]+\\.[a-zA-Z]{2,}$&quot;)\n    df[&quot;email_valid&quot;] = df[&quot;email&quot;].apply(\n        lambda e: bool(email_re.match(str(e))) if pd.notna(e) else False\n    )\n\n    return df\n\n\n# ── Step 4: Enrich ────────────────────────────────────────────────────────────\n\ndef enrich(df: pd.DataFrame) -&gt; pd.DataFrame:\n    &quot;&quot;&quot;Add derived columns: revenue tier, days since signup, lifetime value bucket.&quot;&quot;&quot;\n    df = df.copy()\n    today = pd.Timestamp(&quot;2024-01-01&quot;)   # fixed reference date for reproducibility\n\n    df[&quot;days_since_signup&quot;] = (today - df[&quot;signup_date&quot;]).dt.days\n\n    # Revenue tier\n    bins   = [-np.inf, 0,  500, 1500, np.inf]\n    labels = [&quot;No Revenue&quot;, &quot;Low&quot;, &quot;Mid&quot;, &quot;High&quot;]\n    df[&quot;revenue_tier&quot;] = pd.cut(df[&quot;revenue&quot;], bins=bins, labels=labels)\n\n    return df\n\n\n# ── Step 5: Reshape ───────────────────────────────────────────────────────────\n\ndef pivot_plan_country(df: pd.DataFrame) -&gt; pd.DataFrame:\n    &quot;&quot;&quot;Pivot to show revenue total by plan × country.&quot;&quot;&quot;\n    return (\n        df.pivot_table(\n            values=&quot;revenue&quot;,\n            index=&quot;country&quot;,\n            columns=&quot;plan&quot;,\n            aggfunc=&quot;sum&quot;,\n            fill_value=0,\n        )\n        .round(2)\n    )\n\n\n# ── Main ──────────────────────────────────────────────────────────────────────\n\ndef main():\n    print(&quot;── Data Wrangler ─────────────────────────────────\\n&quot;)\n\n    raw = load_raw(RAW_CSV)\n    print(f&quot;Raw shape:  {raw.shape}&quot;)\n\n    clean = validate(standardise(raw))\n    rich  = enrich(clean)\n\n    print(f&quot;Clean shape: {rich.shape}\\n&quot;)\n    print(&quot;Cleaned Dataset:&quot;)\n    print(rich[[&quot;name&quot;, &quot;plan&quot;, &quot;country&quot;, &quot;revenue&quot;, &quot;revenue_tier&quot;, &quot;email_valid&quot;]].to_string(index=False))\n\n    print(&quot;\\nRevenue Pivot (Country × Plan):&quot;)\n    print(pivot_plan_country(rich).to_string())\n\n    issues = rich[rich[[&quot;revenue&quot;, &quot;signup_date&quot;]].isna().any(axis=1)]\n    if not issues.empty:\n        print(f&quot;\\n⚠ {len(issues)} row(s) with data quality issues:&quot;)\n        print(issues[[&quot;id&quot;, &quot;name&quot;, &quot;revenue&quot;, &quot;signup_date&quot;]].to_string(index=False))\n\n    print(&quot;\\n── Done ──────────────────────────────────────────&quot;)\n\n\nif __name__ == &quot;__main__&quot;:\n    main()\n", "api_client.py": "&quot;&quot;&quot;\napi_client.py\n-------------\nDemonstrates HTTP request handling, response parsing, error management,\nrate-limit-aware retries, and typed data models using dataclasses.\nUses the free Open-Meteo weather API (no key required).\n&quot;&quot;&quot;\n\nimport time\nimport json\nimport urllib.request\nimport urllib.parse\nimport urllib.error\nfrom dataclasses import dataclass, field, asdict\nfrom typing import Optional\n\n\n# ── Data Models ───────────────────────────────────────────────────────────────\n\n@dataclass\nclass Location:\n    name:      str\n    latitude:  float\n    longitude: float\n    country:   str = &quot;&quot;\n\n\n@dataclass\nclass DailyWeather:\n    date:          str\n    temp_max_c:    float\n    temp_min_c:    float\n    precipitation: float   # mm\n    windspeed_max: float   # km/h\n\n    @property\n    def temp_range(self) -&gt; float:\n        return round(self.temp_max_c - self.temp_min_c, 1)\n\n    @property\n    def temp_max_f(self) -&gt; float:\n        return round(self.temp_max_c * 9 / 5 + 32, 1)\n\n\n@dataclass\nclass WeatherReport:\n    location:    Location\n    fetched_at:  str\n    daily:       list[DailyWeather] = field(default_factory=list)\n\n    def summary(self) -&gt; dict:\n        if not self.daily:\n            return {}\n        temps = [d.temp_max_c for d in self.daily]\n        rain  = [d.precipitation for d in self.daily]\n        return {\n            &quot;avg_high_c&quot;:     round(sum(temps) / len(temps), 1),\n            &quot;max_high_c&quot;:     max(temps),\n            &quot;min_high_c&quot;:     min(temps),\n            &quot;total_rain_mm&quot;:  round(sum(rain), 1),\n            &quot;rainy_days&quot;:     sum(1 for r in rain if r &gt; 1),\n        }\n\n\n# ── HTTP Client ───────────────────────────────────────────────────────────────\n\nclass APIClient:\n    &quot;&quot;&quot;\n    Minimal HTTP client with:\n    - Query-param URL builder\n    - JSON parsing\n    - Retry logic with exponential back-off\n    - Timeout handling\n    &quot;&quot;&quot;\n\n    BASE_URL  = &quot;https://api.open-meteo.com/v1/forecast&quot;\n    TIMEOUT   = 10   # seconds\n    MAX_RETRY = 3\n\n    def get(self, params: dict) -&gt; dict:\n        &quot;&quot;&quot;GET request with retries. Returns parsed JSON body.&quot;&quot;&quot;\n        url = f&quot;{self.BASE_URL}?{urllib.parse.urlencode(params)}&quot;\n\n        for attempt in range(1, self.MAX_RETRY + 1):\n            try:\n                print(f&quot;  → Attempt {attempt}: GET {url[:80]}...&quot;)\n                with urllib.request.urlopen(url, timeout=self.TIMEOUT) as resp:\n                    if resp.status != 200:\n                        raise RuntimeError(f&quot;HTTP {resp.status}&quot;)\n                    return json.loads(resp.read().decode())\n\n            except urllib.error.HTTPError as e:\n                if e.code == 429:   # rate limited\n                    wait = 2 ** attempt\n                    print(f&quot;  ⚠ Rate limited — waiting {wait}s&quot;)\n                    time.sleep(wait)\n                else:\n                    raise\n            except urllib.error.URLError as e:\n                print(f&quot;  ✗ Network error: {e.reason}&quot;)\n                if attempt == self.MAX_RETRY:\n                    raise\n\n        raise RuntimeError(&quot;Max retries exceeded&quot;)\n\n\n# ── Fetch &amp; Parse ─────────────────────────────────────────────────────────────\n\ndef fetch_weather(location: Location, days: int = 7) -&gt; Optional[WeatherReport]:\n    &quot;&quot;&quot;\n    Fetch a 7-day forecast for a location and parse it into a WeatherReport.\n    Returns None on failure without crashing the caller.\n    &quot;&quot;&quot;\n    client = APIClient()\n    params = {\n        &quot;latitude&quot;:       location.latitude,\n        &quot;longitude&quot;:      location.longitude,\n        &quot;daily&quot;:          &quot;temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max&quot;,\n        &quot;forecast_days&quot;:  days,\n        &quot;timezone&quot;:       &quot;auto&quot;,\n    }\n\n    try:\n        data = client.get(params)\n    except Exception as e:\n        print(f&quot;  ✗ Failed to fetch {location.name}: {e}&quot;)\n        return None\n\n    daily_data = data.get(&quot;daily&quot;, {})\n    dates      = daily_data.get(&quot;time&quot;, [])\n\n    daily = [\n        DailyWeather(\n            date          = dates[i],\n            temp_max_c    = daily_data[&quot;temperature_2m_max&quot;][i],\n            temp_min_c    = daily_data[&quot;temperature_2m_min&quot;][i],\n            precipitation = daily_data[&quot;precipitation_sum&quot;][i] or 0.0,\n            windspeed_max = daily_data[&quot;windspeed_10m_max&quot;][i] or 0.0,\n        )\n        for i in range(len(dates))\n    ]\n\n    return WeatherReport(\n        location   = location,\n        fetched_at = data.get(&quot;generationtime_ms&quot;, &quot;n/a&quot;),\n        daily      = daily,\n    )\n\n\n# ── Batch Fetch ───────────────────────────────────────────────────────────────\n\ndef compare_cities(locations: list[Location]) -&gt; list[WeatherReport]:\n    &quot;&quot;&quot;Fetch weather for multiple cities sequentially.&quot;&quot;&quot;\n    reports = []\n    for loc in locations:\n        print(f&quot;\\nFetching: {loc.name}, {loc.country}&quot;)\n        report = fetch_weather(loc)\n        if report:\n            reports.append(report)\n            time.sleep(0.3)   # polite pacing between requests\n    return reports\n\n\n# ── Main ──────────────────────────────────────────────────────────────────────\n\nCITIES = [\n    Location(&quot;Amsterdam&quot;,  52.3676,   4.9041,  &quot;Netherlands&quot;),\n    Location(&quot;Tokyo&quot;,      35.6762,  139.6503, &quot;Japan&quot;),\n    Location(&quot;Seoul&quot;,      37.5665,  126.9780, &quot;South Korea&quot;),\n    Location(&quot;Singapore&quot;,   1.3521,  103.8198, &quot;Singapore&quot;),\n]\n\n\ndef main():\n    print(&quot;── API Client: Weather Forecast ──────────────────\\n&quot;)\n\n    reports = compare_cities(CITIES)\n\n    print(&quot;\\n── 7-Day Forecast Summaries ──────────────────────&quot;)\n    for r in reports:\n        s = r.summary()\n        print(f&quot;\\n  {r.location.name} ({r.location.country})&quot;)\n        print(f&quot;    Avg high:     {s[&#x27;avg_high_c&#x27;]} °C&quot;)\n        print(f&quot;    Range:        {s[&#x27;min_high_c&#x27;]} – {s[&#x27;max_high_c&#x27;]} °C&quot;)\n        print(f&quot;    Total rain:   {s[&#x27;total_rain_mm&#x27;]} mm over {s[&#x27;rainy_days&#x27;]} rainy days&quot;)\n\n    print(&quot;\\n── Daily Detail (first city) ─────────────────────&quot;)\n    if reports:\n        for day in reports[0].daily:\n            print(f&quot;  {day.date}  High: {day.temp_max_c}°C ({day.temp_max_f}°F)  &quot;\n                  f&quot;Range: {day.temp_range}°C  Rain: {day.precipitation}mm&quot;)\n\n    print(&quot;\\n── Done ──────────────────────────────────────────&quot;)\n\n\nif __name__ == &quot;__main__&quot;:\n    main()\n", "file_organizer.py": "&quot;&quot;&quot;\nfile_organizer.py\n-----------------\nOOP-based automation tool that scans a directory, categorises files\nby type, detects duplicates via hash, and produces a structured audit report.\nDemonstrates: classes, pathlib, hashlib, context managers, logging, argparse.\n&quot;&quot;&quot;\n\nimport hashlib\nimport logging\nimport argparse\nimport json\nfrom pathlib import Path\nfrom collections import defaultdict\nfrom dataclasses import dataclass, field\nfrom datetime import datetime\n\n\n# ── Logging Setup ─────────────────────────────────────────────────────────────\n\nlogging.basicConfig(\n    level=logging.INFO,\n    format=&quot;%(asctime)s  %(levelname)-8s  %(message)s&quot;,\n    datefmt=&quot;%H:%M:%S&quot;,\n)\nlog = logging.getLogger(__name__)\n\n\n# ── Configuration ─────────────────────────────────────────────────────────────\n\nCATEGORIES = {\n    &quot;Images&quot;:     {&quot;.jpg&quot;, &quot;.jpeg&quot;, &quot;.png&quot;, &quot;.gif&quot;, &quot;.webp&quot;, &quot;.svg&quot;, &quot;.bmp&quot;},\n    &quot;Documents&quot;:  {&quot;.pdf&quot;, &quot;.docx&quot;, &quot;.doc&quot;, &quot;.txt&quot;, &quot;.md&quot;, &quot;.pptx&quot;, &quot;.xlsx&quot;},\n    &quot;Data&quot;:       {&quot;.csv&quot;, &quot;.json&quot;, &quot;.parquet&quot;, &quot;.xlsx&quot;, &quot;.tsv&quot;, &quot;.xml&quot;},\n    &quot;Code&quot;:       {&quot;.py&quot;, &quot;.js&quot;, &quot;.ts&quot;, &quot;.html&quot;, &quot;.css&quot;, &quot;.r&quot;, &quot;.qmd&quot;, &quot;.ipynb&quot;},\n    &quot;Archives&quot;:   {&quot;.zip&quot;, &quot;.tar&quot;, &quot;.gz&quot;, &quot;.rar&quot;, &quot;.7z&quot;},\n    &quot;Video&quot;:      {&quot;.mp4&quot;, &quot;.mov&quot;, &quot;.avi&quot;, &quot;.mkv&quot;},\n    &quot;Audio&quot;:      {&quot;.mp3&quot;, &quot;.wav&quot;, &quot;.aac&quot;, &quot;.flac&quot;},\n}\n\n\n# ── Data Models ───────────────────────────────────────────────────────────────\n\n@dataclass\nclass FileRecord:\n    path:     Path\n    size_kb:  float\n    category: str\n    ext:      str\n    hash:     str = &quot;&quot;\n\n    def to_dict(self) -&gt; dict:\n        return {\n            &quot;path&quot;:     str(self.path),\n            &quot;size_kb&quot;:  self.size_kb,\n            &quot;category&quot;: self.category,\n            &quot;ext&quot;:      self.ext,\n            &quot;hash&quot;:     self.hash,\n        }\n\n\n@dataclass\nclass AuditReport:\n    scanned_at:   str\n    root:         str\n    total_files:  int = 0\n    total_size_kb: float = 0.0\n    by_category:  dict = field(default_factory=dict)\n    duplicates:   list = field(default_factory=list)\n    large_files:  list = field(default_factory=list)\n\n\n# ── Core Classes ─────────────────────────────────────────────────────────────\n\nclass FileScanner:\n    &quot;&quot;&quot;Recursively scans a directory and categorises every file.&quot;&quot;&quot;\n\n    def __init__(self, root: Path, min_size_kb: float = 0):\n        self.root = root\n        self.min_size_kb = min_size_kb\n        self.records: list[FileRecord] = []\n\n    def _categorise(self, ext: str) -&gt; str:\n        ext = ext.lower()\n        for cat, exts in CATEGORIES.items():\n            if ext in exts:\n                return cat\n        return &quot;Other&quot;\n\n    def _hash_file(self, path: Path, chunk: int = 65536) -&gt; str:\n        &quot;&quot;&quot;Compute SHA-256 of first 64 KB (fast duplicate detection).&quot;&quot;&quot;\n        h = hashlib.sha256()\n        try:\n            with open(path, &quot;rb&quot;) as f:\n                h.update(f.read(chunk))\n        except (OSError, PermissionError) as e:\n            log.warning(f&quot;Cannot hash {path.name}: {e}&quot;)\n            return &quot;&quot;\n        return h.hexdigest()\n\n    def scan(self) -&gt; &quot;FileScanner&quot;:\n        log.info(f&quot;Scanning: {self.root}&quot;)\n        for path in self.root.rglob(&quot;*&quot;):\n            if not path.is_file():\n                continue\n            size_kb = round(path.stat().st_size / 1024, 2)\n            if size_kb &lt; self.min_size_kb:\n                continue\n            record = FileRecord(\n                path     = path.relative_to(self.root),\n                size_kb  = size_kb,\n                category = self._categorise(path.suffix),\n                ext      = path.suffix.lower(),\n                hash     = self._hash_file(path),\n            )\n            self.records.append(record)\n        log.info(f&quot;Found {len(self.records)} files&quot;)\n        return self\n\n\nclass DuplicateDetector:\n    &quot;&quot;&quot;Groups FileRecords by content hash to find duplicates.&quot;&quot;&quot;\n\n    def __init__(self, records: list[FileRecord]):\n        self.records = records\n\n    def find(self) -&gt; list[list[dict]]:\n        groups: dict[str, list[FileRecord]] = defaultdict(list)\n        for r in self.records:\n            if r.hash:\n                groups[r.hash].append(r)\n\n        duplicates = [\n            [f.to_dict() for f in group]\n            for group in groups.values()\n            if len(group) &gt; 1\n        ]\n        log.info(f&quot;Duplicate groups found: {len(duplicates)}&quot;)\n        return duplicates\n\n\nclass ReportBuilder:\n    &quot;&quot;&quot;Assembles scan results into a structured AuditReport.&quot;&quot;&quot;\n\n    SIZE_ALERT_KB = 5120   # flag files &gt; 5 MB\n\n    def __init__(self, scanner: FileScanner, duplicates: list):\n        self.scanner    = scanner\n        self.duplicates = duplicates\n\n    def build(self) -&gt; AuditReport:\n        records = self.scanner.records\n        report  = AuditReport(\n            scanned_at  = datetime.utcnow().isoformat() + &quot;Z&quot;,\n            root        = str(self.scanner.root),\n            total_files = len(records),\n            total_size_kb = round(sum(r.size_kb for r in records), 2),\n            duplicates  = self.duplicates,\n        )\n\n        # Category breakdown\n        cat_groups: dict[str, list[FileRecord]] = defaultdict(list)\n        for r in records:\n            cat_groups[r.category].append(r)\n\n        report.by_category = {\n            cat: {\n                &quot;count&quot;:    len(files),\n                &quot;size_kb&quot;:  round(sum(f.size_kb for f in files), 2),\n                &quot;extensions&quot;: list({f.ext for f in files}),\n            }\n            for cat, files in sorted(cat_groups.items())\n        }\n\n        # Large files\n        report.large_files = [\n            r.to_dict()\n            for r in sorted(records, key=lambda x: x.size_kb, reverse=True)\n            if r.size_kb &gt; self.SIZE_ALERT_KB\n        ][:10]   # top 10 only\n\n        return report\n\n\n# ── CLI Interface ─────────────────────────────────────────────────────────────\n\ndef parse_args() -&gt; argparse.Namespace:\n    p = argparse.ArgumentParser(\n        description=&quot;Scan a directory, categorise files, detect duplicates.&quot;\n    )\n    p.add_argument(&quot;directory&quot;, nargs=&quot;?&quot;, default=&quot;.&quot;,\n                   help=&quot;Root directory to scan (default: current dir)&quot;)\n    p.add_argument(&quot;--output&quot;, &quot;-o&quot;, default=&quot;audit_report.json&quot;,\n                   help=&quot;Output JSON path&quot;)\n    p.add_argument(&quot;--min-size&quot;, type=float, default=0,\n                   help=&quot;Ignore files smaller than N KB&quot;)\n    return p.parse_args()\n\n\n# ── Main ──────────────────────────────────────────────────────────────────────\n\ndef main():\n    args = parse_args()\n    root = Path(args.directory).expanduser().resolve()\n\n    if not root.exists():\n        log.error(f&quot;Directory not found: {root}&quot;)\n        return\n\n    # Pipeline: Scan → Detect → Report → Save\n    scanner    = FileScanner(root, min_size_kb=args.min_size).scan()\n    dupes      = DuplicateDetector(scanner.records).find()\n    report     = ReportBuilder(scanner, dupes).build()\n\n    # Print summary to terminal\n    print(f&quot;\\n── Audit Summary ─────────────────────────────────&quot;)\n    print(f&quot;  Root:          {report.root}&quot;)\n    print(f&quot;  Total files:   {report.total_files:,}&quot;)\n    print(f&quot;  Total size:    {report.total_size_kb / 1024:.2f} MB&quot;)\n    print(f&quot;  Duplicate groups: {len(report.duplicates)}&quot;)\n    print(f&quot;\\n  By Category:&quot;)\n    for cat, info in report.by_category.items():\n        print(f&quot;    {cat:&lt;14} {info[&#x27;count&#x27;]:&gt;4} files   {info[&#x27;size_kb&#x27;] / 1024:&gt;7.2f} MB&quot;)\n\n    # Save JSON report\n    with open(args.output, &quot;w&quot;) as f:\n        json.dump(vars(report), f, indent=2)\n    log.info(f&quot;Report saved → {args.output}&quot;)\n\n\nif __name__ == &quot;__main__&quot;:\n    main()\n"};
+
+// ── Sidebar data ───────────────────────────────────────────────────────────
+const PROJECTS = [
+  {
+    title: 'Marketing Funnel Analytics',
+    desc: 'Simulates a GA4-style event pipeline, computes stage conversion rates, ranks channels by purchase CVR, and exports a JSON report.',
+    run: 'python funnel_analytics.py',
+    concepts: ['pandas groupby + reindex','pct_change() for step-drop','random seeding for reproducibility','JSON serialization']
+  },
+  {
+    title: 'Data Wrangler',
+    desc: 'Takes a messy real-world CSV, normalises casing, validates emails with regex, handles multi-format dates, enriches with derived columns, and pivots by plan × country.',
+    run: 'python data_wrangler.py',
+    concepts: ['multi-step pandas pipeline','regex email validation','pd.cut() revenue tiers','pivot_table() reshape']
+  },
+  {
+    title: 'REST API Client',
+    desc: 'Typed dataclass models, a retry-aware HTTP client with exponential back-off, batch city fetching, and live weather data from Open-Meteo (no key needed).',
+    run: 'python api_client.py',
+    concepts: ['@dataclass + @property','urllib retry with back-off','Optional return typing','list comprehension parsing']
+  },
+  {
+    title: 'File Organizer',
+    desc: 'OOP pipeline: FileScanner → DuplicateDetector → ReportBuilder. Hashes files for duplicate detection, flags large files, and outputs a structured JSON audit.',
+    run: 'python file_organizer.py /your/dir',
+    concepts: ['class-based pipeline','SHA-256 via hashlib','pathlib.rglob traversal','argparse CLI + logging']
+  }
+];
+
+// ── Init ───────────────────────────────────────────────────────────────────
+const keys = ['funnel_analytics.py','data_wrangler.py','api_client.py','file_organizer.py'];
+
+keys.forEach((k, i) => {
+  const el = document.getElementById('code-' + i);
+  el.textContent = CODE[k];
+});
+hljs.highlightAll();
+
+let current = 0;
+renderSidebar(0);
+
+function switchTab(idx) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i === idx));
+  document.querySelectorAll('.code-panel').forEach((p,i) => p.classList.toggle('active', i === idx));
+  current = idx;
+  renderSidebar(idx);
+}
+
+function renderSidebar(idx) {
+  const p = PROJECTS[idx];
+  document.getElementById('sidebar').innerHTML = `
+    <div class="project-meta">
+      <div class="meta-label">Script</div>
+      <div class="meta-value">${String(idx + 1).padStart(2,'0')} / 04</div>
+    </div>
+    <div class="project-meta">
+      <div class="meta-label">Title</div>
+      <div class="meta-value highlight">${p.title}</div>
+    </div>
+    <div class="project-meta">
+      <div class="meta-label">What it does</div>
+      <div style="font-size:0.82rem;color:#9ca3af;line-height:1.6;">${p.desc}</div>
+    </div>
+    <div class="concept-section">
+      <div class="concept-title">Key Concepts</div>
+      ${p.concepts.map(c => `<div class="concept-item">${c}</div>`).join('')}
+    </div>
+    <div class="run-block">
+      <div class="run-label">Run it</div>
+      <div class="run-cmd">${p.run}</div>
+    </div>
+  `;
+}
+
+function copyCode(idx, btn) {
+  const raw = CODE[keys[idx]];
+  // Decode HTML entities
+  const txt = document.createElement('textarea');
+  txt.innerHTML = raw;
+  navigator.clipboard.writeText(txt.value).then(() => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+---
+title: "Course Summary: Data Analytics with Google Cloud BigQuery and Looker Studio"
+author: "Aiyon Peoples"
+date: today
+format: 
+  html:
+    embed-resources: true
+    toc: true
+    toc-depth: 2
+---
+
+## Introduction
+This document summarizes the key learnings from the LinkedIn Learning course "Data Analytics with Google Cloud BigQuery and Looker Studio." The training provided hands-on experience in using Google's cloud ecosystem to query large public datasets and build interactive visualizations, with a specific focus on global temperature trends.
+
+## 1. Visualizing BigQuery Data as Line Charts
+The first section established the foundation for navigating the Google Cloud environment and writing basic queries.
+
+* **Exploring Public Datasets:** Learned how to navigate the BigQuery interface to access and utilize publicly available datasets.
+* **Basic SQL & Aggregations:** Covered the essentials of running SQL queries, focusing on core aggregation functions (like `AVG()`, `MIN()`, and `MAX()`) to summarize data.
+* **Cross-Table Aggregation:** Practiced aggregating data across multiple tables to build a comprehensive dataset.
+* **Looker Studio Integration:** Successfully connected the queried BigQuery data to Looker Studio to create line charts, specifically visualizing global temperature changes over time.
+
+## 2. Dimensions and Column Charts
+The second section expanded into relational data manipulation and advanced charting techniques.
+
+* **Joining Datasets:** Explored the mechanics of SQL `JOIN`s (such as `INNER JOIN` and `LEFT JOIN`) to combine separate datasets effectively based on matching keys.
+* **String Manipulation:** Utilized string functions, including the concatenation operator (`||`), to format text data directly within BigQuery.
+* **Managing Looker Studio Data Sources:** Learned the critical step of updating and reconnecting a BigQuery data source in Looker Studio whenever the underlying table schema changes.
+* **Visualizing Dimensions:** Applied these new datasets to build column charts, completing a challenge to visualize and compare temperature trends across selected countries.
+
+## 3. Intermediate SQL Transformation and Geo Charts
+The final section covered advanced SQL syntax and geospatial data visualization.
+
+* **Complex SQL Queries:** Deconstructed the anatomy of complex queries, highlighting the use of the `WITH` clause to bind subqueries (Common Table Expressions) for better readability and organization.
+* **Geospatial Visualizations:** Explored how to map data using Looker Studio's geo charts.
+* **Mapping Temperature Data:** Successfully completed the final challenge by comparing countries' temperature changes using interactive map visuals, adjusting map layers and styles for clarity.
+
+## Conclusion
+By integrating BigQuery's robust SQL processing power with Looker Studio's visualization capabilities, this course demonstrated how to transform raw, complex data into accessible and interactive business intelligence dashboards. 
+
+---
+
+## Course Certification
+
+![LinkedIn Learning Certificate](certificate_screenshot.pdf.svg)

@@ -1,0 +1,102 @@
+---
+title: "How to create a reproducible reporting HTML file using Rmd file"
+author: "Peoples, Aiyon"
+date: "`r format(Sys.time())`"
+output: 
+  html_document:
+  code_folding: show
+toc: yes
+toc_depth: 4
+toc_float:
+  collapsed: false
+highlight: espresso
+theme: journal
+number_sections: yes
+---
+  
+  # Introduction to R Markdown
+  
+  This document serves as a reproducible report for the DS-L01-2-Rmd Principle Assignment, demonstrating the use of R Markdown for creating dynamic and well-structured reports. The content herein is based on the video lecture "R Markdown: Reproducible Report in Data Science" (0:00 - 1:21:0).
+
+## Understanding R Markdown Files
+
+R Markdown files (`.Rmd`) are powerful tools for creating dynamic reports with R. They combine R code, its output, and explanatory text into a single document. An `.Rmd` file is typically composed of three main areas:
+  
+  1.  **YAML Header**: Located at the top of the document, enclosed by `---`, this section contains metadata about the document, such as the title, author, date, and output format options. The YAML header controls the global settings for the knitted document.
+
+2.  **Code Chunks**: These are blocks of R code embedded within the document. Code chunks start with ````{r}` and end with ````. The code within these chunks can be executed, and their output (e.g., results, plots) can be included directly in the final report.
+
+3.  **Text Area**: This is where you write your narrative, explanations, and interpretations using Markdown syntax. It functions much like a word processor, allowing for various formatting options like headings, bullet points, bold, and italics.
+
+## Assignment Tasks and Learning Notes
+
+This section will detail the steps taken to complete the assignment, incorporating code examples and personal learning notes as instructed.
+
+### Setting up the Environment
+
+As per the assignment instructions, the first step involves setting up the environment and creating an RStudio project. This ensures a well-organized file structure and proper working directory management.
+
+-   **Folder Structure**: A dedicated folder named `DS-L01-2` was created under the course folder.
+-   **RStudio Project**: An RStudio project was initiated within the `DS-L01-2` folder, automatically generating an `.Rproj` file. This file is crucial for maintaining the working directory and project-specific settings.
+-   **Rmd File Creation**: This `Peoples, Aiyon-DS-L01-2-Rmd_Principle.Rmd` file was created and saved within the project folder.
+
+### Exploring R Markdown Features (Video Notes)
+
+Below are notes and code examples derived from the video lecture, demonstrating various R Markdown features.
+
+#### Basic R Code Execution
+
+Code chunks allow for the execution of R code directly within the document. The results are then displayed in the knitted output.
+
+```{r}
+# This is a simple R code chunk
+x <- 1:10
+y <- x^2
+plot(x, y, main = "Simple Plot")
+```
+
+-   **Learning Note**: The `plot()` function creates a basic scatter plot. The `main` argument sets the title of the plot.
+
+#### Loading Libraries and Data
+
+It's common to load necessary R libraries and data within code chunks.
+
+```{r}
+# Load the ggplot2 library for advanced plotting
+library(ggplot2)
+
+# Create some sample data
+sample_data <- data.frame(
+  category = rep(c("A", "B", "C"), each = 30),
+  value = c(rnorm(30, 10, 2), rnorm(30, 15, 3), rnorm(30, 12, 2))
+)
+
+head(sample_data)
+```
+
+-   **Learning Note**: `library(ggplot2)` loads the `ggplot2` package, which is excellent for creating sophisticated data visualizations. `rnorm()` generates random numbers from a normal distribution.
+
+#### Data Visualization with `ggplot2`
+
+Creating plots with `ggplot2` within R Markdown is a key feature for reproducible data analysis.
+
+```{r}
+# Create a boxplot using ggplot2
+ggplot(sample_data, aes(x = category, y = value, fill = category)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Values by Category",
+       x = "Category",
+       y = "Value")
+```
+
+-   **Learning Note**: `ggplot()` initializes a ggplot object. `aes()` maps variables to aesthetic properties. `geom_boxplot()` adds boxplot layers. `labs()` customizes labels and titles.
+
+#### Inline R Code
+
+R Markdown also allows for inline execution of R code, useful for embedding results directly into the text. For example, the mean value of category A is `r mean(sample_data$value[sample_data$category == "A"])`.
+
+-   **Learning Note**: Inline code is written using `` `r code` ``. This is very useful for dynamically updating statistics or values in the narrative.
+
+## Conclusion
+
+This assignment has provided a practical introduction to R Markdown, covering its structure, key features, and application in creating reproducible reports. The ability to combine code, output, and narrative seamlessly is invaluable for data science workflows. The next step is to knit this document to an HTML file and submit both the `.Rmd` and `.html` files.

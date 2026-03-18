@@ -1,0 +1,137 @@
+"""
+funnel_analytics.py
+-------------------
+Marketing funnel analysis pipeline using pandas.
+Ingests raw event data, computes conversion rates at each
+funnel stage, and outputs a ranked channel performance summary.
+"""
+
+import pandas as pd
+import json
+from datetime import datetime, timedelta
+import random
+
+
+# ── Synthetic Data Generator ──────────────────────────────────────────────────
+
+def generate_event_data(n: int = 500, seed: int = 42) -> pd.DataFrame:
+    """Create a synthetic user-event dataset that mirrors GA4 export structure."""
+    random.seed(seed)
+
+    channels   = ["Organic Search", "Paid Social", "Email", "Direct", "Referral"]
+    stages     = ["impression", "click", "add_to_cart", "checkout", "purchase"]
+    drop_rates = [0.55, 0.40, 0.30, 0.15]   # probability of dropping at each stage
+
+    records = []
+    base_date = datetime(2024, 1, 1)
+
+    for user_id in range(1, n + 1):
+        channel = random.choice(channels)
+        event_date = base_date + timedelta(days=random.randint(0, 89))
+
+        for i, stage in enumerate(stages):
+            records.append({
+                "user_id":    user_id,
+                "channel":    channel,
+                "stage":      stage,
+                "event_date": event_date,
+            })
+            # Apply probabilistic drop-off so not every user reaches purchase
+            if i < len(drop_rates) and random.random() < drop_rates[i]:
+                break
+
+    return pd.DataFrame(records)
+
+
+# ── Funnel Computation ────────────────────────────────────────────────────────
+
+def compute_funnel(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    For each funnel stage, count unique users who reached it.
+    Returns a DataFrame with absolute counts and step-over-step conversion rates.
+    """
+    stages = ["impression", "click", "add_to_cart", "checkout", "purchase"]
+
+    stage_counts = (
+        df.groupby("stage")["user_id"]
+        .nunique()
+        .reindex(stages)
+        .reset_index()
+        .rename(columns={"user_id": "users"})
+    )
+
+    stage_counts["conversion_rate"] = (
+        stage_counts["users"] / stage_counts["users"].iloc[0] * 100
+    ).round(2)
+
+    stage_counts["step_over_step"] = (
+        stage_counts["users"].pct_change() * 100
+    ).round(2)
+
+    return stage_counts
+
+
+# ── Channel Performance ───────────────────────────────────────────────────────
+
+def channel_performance(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute per-channel purchase conversion rate and rank channels.
+    A 'purchase conversion rate' = purchasers / first-touch impressions per channel.
+    """
+    impressions = (
+        df[df["stage"] == "impression"]
+        .groupby("channel")["user_id"]
+        .nunique()
+        .rename("impressions")
+    )
+    purchases = (
+        df[df["stage"] == "purchase"]
+        .groupby("channel")["user_id"]
+        .nunique()
+        .rename("purchases")
+    )
+
+    perf = pd.concat([impressions, purchases], axis=1).fillna(0)
+    perf["conversion_pct"] = (perf["purchases"] / perf["impressions"] * 100).round(2)
+    perf = perf.sort_values("conversion_pct", ascending=False).reset_index()
+    perf.index += 1   # rank starts at 1
+    return perf
+
+
+# ── Export ────────────────────────────────────────────────────────────────────
+
+def export_summary(funnel: pd.DataFrame, channels: pd.DataFrame, path: str = "funnel_report.json"):
+    """Serialize results to JSON for downstream use (e.g., Looker Studio, dashboard)."""
+    summary = {
+        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "funnel":       funnel.to_dict(orient="records"),
+        "channels":     channels.reset_index().to_dict(orient="records"),
+    }
+    with open(path, "w") as f:
+        json.dump(summary, f, indent=2)
+    print(f"✓ Report saved → {path}")
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+def main():
+    print("── Funnel Analytics ──────────────────────────────")
+
+    df = generate_event_data(n=500)
+    print(f"  Events loaded:  {len(df):,}")
+    print(f"  Unique users:   {df['user_id'].nunique():,}\n")
+
+    funnel = compute_funnel(df)
+    print("  Funnel Overview:")
+    print(funnel.to_string(index=False))
+
+    print("\n  Channel Performance (ranked):")
+    channels = channel_performance(df)
+    print(channels.to_string())
+
+    export_summary(funnel, channels)
+    print("\n── Done ──────────────────────────────────────────")
+
+
+if __name__ == "__main__":
+    main()

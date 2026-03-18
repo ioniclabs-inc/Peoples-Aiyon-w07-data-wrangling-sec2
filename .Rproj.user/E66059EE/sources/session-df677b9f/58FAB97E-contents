@@ -1,0 +1,301 @@
+---
+title: "M03-2: Data Visualization-Application Assignment"
+author: "Aiyon Peoples"
+date: '`r format(Sys.time())`'
+format: 
+  html: 
+    toc: true
+    toc-depth: 4
+    number-sections: true
+    code-line-numbers: true
+    code-fold: false
+    code-link: true
+    embed-resources: true
+editor: visual
+execute: 
+  freeze: auto
+  warning: false
+  error: true
+---
+
+# Preparation
+
+```{r}
+install.packages("ggrepel")
+library(tidyverse)
+library(ggrepel)
+library(ggthemes)
+library(scales)
+library(plotly)
+library(lattice)
+library(GGally)
+library(gt)
+```
+
+```{r}
+# install.packages("wooldridge")
+library(wooldridge)
+data(attend)
+df <- as_tibble(attend)
+```
+
+# Ex 1: GT table
+
+## 1.1. Create a table that shows data using the GT package.
+
+## 1.2. Decorate the table using at least five functions to make the table presentable.
+
+library(gt)
+
+```{r}
+gt(head(df)) %>%
+  tab_header(
+    title = md("**Attendance Data**"),
+    subtitle = "First 6 rows of the dataset"
+  ) %>%
+  tab_source_note(
+    source_note = "Source: wooldridge package"
+  ) %>%
+  cols_label(
+    attend = "Classes Attended",
+    termGPA = "Term GPA",
+    priGPA = "Prior GPA",
+    ACT = "ACT Score",
+    final = "Final Exam Score",
+    atndrte = "Attendance Rate (%)",
+    hwrte = "Homework Rate (%)",
+    frosh = "Freshman",
+    soph = "Sophomore",
+    missed = "Classes Missed",
+    stndfnl = "Standardized Final"
+  ) %>%
+  fmt_number(
+    columns = c(termGPA, priGPA, final, stndfnl),
+    decimals = 2
+  ) %>%
+  data_color(
+    columns = atndrte,
+    colors = scales::col_numeric(
+      palette = c("white", "steelblue"),
+      domain = NULL
+    )
+  )
+```
+
+# Ex 2: Scatter plot with ggplot2
+
+## 2.1. Using ggplot2, draw a scatter plot with the x being "priGPA" and the y being "missed".
+
+```{r}
+ggplot(df, aes(x = priGPA, y = missed)) +
+  geom_point()
+```
+
+## 2.2. Modify your scatter plot including the size of points equal to 2 and the color as blue. Next, Add a regression line to the scatter plot with a red color. Then, apply the facet to show the relationship between prior GPA and missed classes by dividing the data into two groups using "soph" variable.
+
+```{r}
+df_soph_relabeled <- df %>% 
+  mutate(soph = case_when(soph == "1" ~ "Sophomore",
+                           soph == "0" ~ "Non-Sophomore"),
+         soph = factor(soph)
+              )
+
+ggplot(df_soph_relabeled, aes(x = priGPA, y = missed)) +
+  geom_point(size = 2, color = "blue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  facet_wrap(~soph)
+```
+
+## 2.3. Add the theme "bw" to it. Also, provide labels for x and y axis, the title of your plot. Using the "caption" option, you may also indicate the level of the third variable (moderator).
+
+```{r}
+ggplot(df_soph_relabeled, aes(x = priGPA, y = missed)) +
+  geom_point(size = 2, color = "blue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  facet_wrap(~soph) +
+  theme_bw() +
+  labs(
+    title = "Relationship between Prior GPA and Missed Classes by Sophomore Status",
+    x = "Prior GPA",
+    y = "Number of Missed Classes",
+    caption = "Data faceted by sophomore status."
+  )
+```
+
+## 2.5. Describe the insights you got from the visualizations.
+
+For both sophomores and non-sophomores, there is a negative relationship between prior GPA and the number of missed classes. Students with higher prior GPAs tend to miss fewer classes. The relationship appears slightly stronger for non-sophomores.
+
+# Ex 3: Understand barplots (dodge vs. stack vs. faceted)
+
+## 3.1. Generate a barplot for the count of ACT scores from "df". What type of distribution does this plot remind you of?
+
+```{r}
+ggplot(df, aes(x = ACT)) +
+  geom_bar()
+```
+
+The distribution of ACT scores appears to be approximately normal.
+
+## 3.2. Create another barplot, but this time your y-axis will be the final score (not ACT counts) with your x-axis kept as "ACT"). Also, fill your plot with the factor of the variable "soph". Try to position the bar chart as dodged (using the 'dodge' option) and as stacked (using 'stack' option), which is a default. See if you can change the labels of the two levels (0 and 1) for "soph" variable to improve the aesthetics of the chart. Also, use faceting to create another chart -- faceted bar chart. You should have three charts.
+
+```{r}
+# Dodged
+ggplot(df_soph_relabeled, aes(x = ACT, y = final, fill = soph)) +
+  geom_bar(stat = "identity", position = "dodge")
+
+# Stacked
+ggplot(df_soph_relabeled, aes(x = ACT, y = final, fill = soph)) +
+  geom_bar(stat = "identity", position = "stack")
+
+# Faceted
+ggplot(df_soph_relabeled, aes(x = ACT, y = final, fill = soph)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~soph)
+```
+
+## 3.3. Carefully evaluate the three charts -- dodged bar chart, stacked bar chart, or faceted bar chart. Pay attention to the value of y variable too. Which one, if any, do you think accurately describes the data? Why do you think so?
+
+The dodged and faceted bar charts are more accurate and easier to interpret. The stacked bar chart is misleading because it sums the final exam scores for sophomores and non-sophomores, which doesn't make sense in this context. The dodged and faceted charts allow for a direct comparison of final exam scores for each ACT score between the two groups.
+
+# Ex 4: Barplots with ACT averages (Understand Bar plots)
+
+## 4.1. Draw three barplots (dodged bar chart, stacked bar chart, or faceted bar chart ) as above, this time using average final exam score after you grouped them by ACT score per each soph group.
+
+```{r}
+df_soph_relabled_summarized <- df_soph_relabeled %>%
+  group_by(soph, ACT) %>% 
+  summarise(final_avg = mean(final),
+            n = n(),
+            .groups = "drop"
+            ) 
+
+# Dodged
+ggplot(df_soph_relabled_summarized, aes(x = ACT, y = final_avg, fill = soph)) +
+  geom_bar(stat = "identity", position = "dodge")
+
+# Stacked
+ggplot(df_soph_relabled_summarized, aes(x = ACT, y = final_avg, fill = soph)) +
+  geom_bar(stat = "identity", position = "stack")
+
+# Faceted
+ggplot(df_soph_relabled_summarized, aes(x = ACT, y = final_avg, fill = soph)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~soph)
+```
+
+## 4.2. Carefully evaluate the three charts -- dodged bar chart, stacked bar chart, or faceted bar chart. Pay attention to the value of the y variable too. Which one(s), if any, do you think accurately describe(s) the data? Why do you think so?
+
+Again, the dodged and faceted charts are the most appropriate. They clearly show the average final exam score for each ACT score, separated by sophomore status. The stacked chart is not suitable as it sums the averages, which is not a meaningful value.
+
+## 4.3. Compare the dodged barplot from Q3.2 with the dodged bar chart from Q4.2. Which chart would you trust and why?
+
+I would trust the dodged bar chart from Q4.2 (with averages) more. The chart from Q3.2 plots the sum of final scores for each ACT category, which can be misleading if the number of students in each category is different. The chart with averages (Q4.2) provides a more standardized and comparable measure of performance.
+
+## 4.4. What would you say about the differences in the patterns of relationships between ACT and final scores shown in the sophomore and non-sophomore groups?
+
+In both groups, there is a general positive trend: higher ACT scores are associated with higher average final exam scores. The relationship appears more consistent for the non-sophomore group.
+
+# Ex 5: Boxplot vs. correct barplot
+
+## 5.1. This time, create a boxplot that can best represent the relationship between ACT scores and final score, grouped by soph. Feel free to add more geometries to this basic chart to represent the data better.
+
+```{r}
+ggplot(df_soph_relabeled, aes(x = factor(ACT), y = final, fill = soph)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.5)
+```
+
+## 5.2. Describe the differences between the box plot above and the barplot with you chose from Q4. Which one do you prefer and why?
+
+The boxplot provides more information about the distribution of final exam scores for each ACT score (median, quartiles, outliers), whereas the bar chart from Q4 only shows the average. I prefer the boxplot because it gives a more complete picture of the data.
+
+## 5.3. What would you say about the differences in the patterns of relationships between ACT and final scores shown in the sophomore and non-sophomore groups?
+
+The boxplot confirms the positive relationship between ACT and final scores for both groups. It also shows that the variability in final scores can be quite large for some ACT scores.
+
+# Ex 6: Impact of ACT on attendance, moderated by freshman status: Boxplot
+
+## 6.1. Draw a boxplot, using "ACT" as the x-axis and "attend" as the y-axis, grouped by freshman variable.
+
+```{r}
+df_frosh_relabeled <- df %>% 
+  mutate(frosh = case_when(frosh == "1" ~ "Freshman",
+                           frosh == "0" ~ "Non-Freshman"),
+         frosh = factor(frosh)
+              )
+
+ggplot(df_frosh_relabeled, aes(x = factor(ACT), y = attend, fill = frosh)) +
+  geom_boxplot() +
+  facet_wrap(~frosh)
+```
+
+## 6.2. Is the relationship between x and y shown in the non-freshman group (denoted as "0" in the data) the same as that shown in the freshman group?
+
+The relationship is not the same. For freshmen, there seems to be a slight positive relationship between ACT scores and attendance. For non-freshmen, the relationship is less clear and appears to be mostly flat.
+
+# Ex 7: Attendance by ACT, moderated by freshman status: Scatter Plot
+
+## 7.1. Next, instead of the boxplots, create scatter plots. Add a line that fits the data. Do the group differences in the pattern of the relationships shown through the barplot become clear or obscure?
+
+```{r}
+ggplot(df_frosh_relabeled, aes(x = ACT, y = attend, color = frosh)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~frosh)
+```
+
+The scatter plot with a regression line makes the group differences clearer. We can see a positive slope for the freshman group and a nearly flat slope for the non-freshman group, confirming the observation from the boxplot.
+
+# Ex 8: Correlations
+
+## 8.1. Draw a correlation plot showing all pairwise associations among the following variables: "attend", "termGPA", "priGPA" and "ACT", "final", "atndrte", and "hwrte". For the correlation table, try both ggpairs() and ggcorr() verbs from GGally package. Which one do you like and why?
+
+```{r}
+selected_vars <- df %>% select(attend, termGPA, priGPA, ACT, final, atndrte, hwrte)
+
+ggcorr(selected_vars)
+ggpairs(selected_vars)
+```
+
+I prefer `ggpairs()` because it provides more detailed information, including scatter plots for each pair of variables, density plots for each variable, and the correlation coefficients. `ggcorr()` only shows the correlation matrix.
+
+## 8.2. Which pair of variables has the highest positive correlation? What is the correlation statistic? Does it make sense? why or why not. Which sets of variables has the next highest correlation?
+
+The pair with the highest positive correlation is `attend` and `atndrte` (classes attended and attendance rate), which is expected as they are different measures of the same concept. The next highest positive correlation is between `termGPA` and `priGPA`.
+
+## 8.3. The correlations among variables give us insights into what students should do to improve their GPA (termGPA and priGPA). According to the data, between attendance rate ("atndrte") and the rate of homework turned in ("hwrte"), which is a more effective way to improve GPA's?
+
+Both `atndrte` and `hwrte` have positive correlations with `termGPA`. However, `hwrte` has a stronger positive correlation with `termGPA` than `atndrte`. This suggests that turning in homework is a more effective way to improve term GPA than just attending classes.
+
+# Ex 9: Scatter plot with regression line for the Impact of priGPA on termGPA
+
+## 9.1. Create a scatter plot with a linear regression line for the variables "priGPA" and "termGPA". Draw a separate regression line for sophomore and non-sophomore group and compare the slope of the line. Assign "plot" to the chart created. Also, print out the chart.
+
+```{r}
+plot <- ggplot(df_soph_relabeled, aes(x = priGPA, y = termGPA, color = soph)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+
+print(plot)
+```
+
+## 9.2. What can you tell about the strengths of the relationships between priGPA and termGPA?
+
+There is a strong positive relationship between `priGPA` and `termGPA` for both sophomores and non-sophomores. The slopes of the regression lines are similar, indicating that the strength of the relationship is comparable for both groups.
+
+# Ex 10: Interactive Plot & Save the plot from Ex 9.
+
+## 10.1. Use the function "ggplotly()" and pass the "plot" through it. Move your cursor over the plots to feel the interactiveness. Also, label your plot with the variable "soph".
+
+```{r}
+ggplotly(plot)
+```
+
+## 10.2. Save your plot created in Ex 9 as an image file with the following name: "myplot.png" and prepare to submit it in the next step.
+
+```{r}
+ggsave("myplot.png", plot = plot)
+```
+
+# applying for github ciopilot

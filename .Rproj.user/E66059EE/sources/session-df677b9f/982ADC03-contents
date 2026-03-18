@@ -1,0 +1,49 @@
+---
+title: "GA4 201 Micro-Application: Explorations"
+author: "Ion Peoples"
+subtitle: "Course: International Market Analysis and Control | Professor Jung"
+format: html
+  theme: vapor
+---
+
+## 1. Module Completion
+
+Evidence of completing all submodules for Dive deeper into GA4 data and reports.
+
+
+![Screenshot 1: Completion of GA4 201 Submodules](module_completion.png)
+
+---
+
+## 2. Evidence Screenshots
+
+**Track Chosen:** Track B (Google Sample Demo Account)  
+**Exploration Type:** Funnel Exploration  
+
+### Figure 1: Exploration Setup
+*This screenshot shows the Tab Settings column, highlighting the specific steps created for the funnel: 1. view_item, 2. add_to_cart, 3. purchase.*
+
+![Figure 1: Funnel Exploration Setup (Variables and Tab Settings)](figure_1.png)
+
+### Figure 2: Exploration Results
+*This screenshot displays the visual funnel chart and the data table beneath it, showing the drop-off rate at each step of the user journey.*
+
+![Figure 2: Funnel Exploration Results showing drop-offs](figure_2.png)
+
+---
+
+## 3. Short Responses
+
+### What question were you trying to answer? 
+I wanted to understand where the most significant friction occurs in the e-commerce purchasing journey by analyzing the drop-off rates between viewing a product, adding it to the cart, and completing the final purchase.
+
+### What did you find? 
+* **Massive Top-of-Funnel Drop-off:** Of the users who triggered a `view_item` event, only about **18%** proceeded to the `add_to_cart` step. 
+* **Strong Checkout Intent:** However, of the users who did add an item to their cart, a solid **32%** followed through to complete the `purchase` event.
+* **Key Bottleneck:** The largest abandonment happens right after viewing the product, indicating that the product pages themselves are where we are losing the vast majority of potential buyers.
+
+### What’s your next investigation step based on the results? 
+My next step is to apply a "Device Category" breakdown to this exact funnel to see if the massive drop-off between viewing an item and adding it to the cart is disproportionately happening on mobile devices versus desktop computers.
+
+### What’s one action you would recommend for your CEP/client? 
+* **Optimize Product Pages:** Overhaul the product landing pages to make the "Add to Cart" call-to-action (CTA) more prominent, ensure pricing is completely transparent, and highlight trust signals (like secure checkout or guarantees) to reduce the initial friction of adding an item to the cart.

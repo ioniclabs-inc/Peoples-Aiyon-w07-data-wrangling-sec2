@@ -1,0 +1,7 @@
+"0",""
+"0","# Confirm it is a data frame"
+"0","class(air.df)"
+"1","[1]"
+"1"," ""data.frame"""
+"1","
+"

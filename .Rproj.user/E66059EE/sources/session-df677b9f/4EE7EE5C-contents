@@ -1,0 +1,343 @@
+---
+title: "M06 — Reflection Essay: Advanced Data Wrangling"
+author: "Aiyon Peoples"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    toc-expand: 3
+    number-sections: true
+    code-link: true
+    embed-resources: true
+    code-tools: true
+    code-overflow: scroll
+    theme: cosmo
+    highlight-style: github
+    css: |
+      body { font-family: 'Segoe UI', sans-serif; line-height: 1.75; }
+      .callout { border-radius: 8px; }
+      blockquote { border-left: 4px solid #4a9eda; background: #f4f9ff; padding: 0.6rem 1rem; border-radius: 4px; }
+editor: visual
+execute:
+  freeze: auto
+  warning: false
+  message: false
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(nycflights13)
+```
+
+---
+
+> **About this report:** This reflection essay covers the key concepts and experiences from Module 06 — Advanced Data Wrangling in R. Each section corresponds to one of the assigned prompts, with narrative responses woven together with code demonstrations where applicable.
+
+---
+
+## Tidyverse Tricks — New Ground from Step 1 {#sec-tidyverse}
+
+**Prompt:** *Summarize what you learned about Tidyverse tricks presented in Step 1 by focusing on the new things you learned that were not dealt with in M05.*
+
+Module 05 introduced me to the core Tidyverse verbs — `filter()`, `select()`, `mutate()`, `group_by()`, and `summarize()`. Those felt like learning the alphabet. Step 1 of M06, by contrast, showed me that there are entire sentences, paragraphs, and essays you can write once you know a few more tricks.
+
+The standout new concepts I encountered included:
+
+- **`across()`** — this function was a genuine revelation. Instead of writing the same `mutate()` or `summarize()` call for every column individually, `across()` lets you apply a function to multiple columns at once, selected by name, type, or a helper like `starts_with()`. For example, rounding every numeric column or computing the mean of several variables simultaneously becomes a one-liner.
+
+- **`rowwise()`** — I had not seen this in M05. It reorients the data frame so that operations apply row-by-row rather than column-by-column. This matters when you want, say, the maximum across three columns *for each row*, rather than the column maximum overall.
+
+- **String manipulation with `stringr`** — While we touched on `str_detect()` before, M06 went deeper into functions like `str_replace_all()`, `str_squish()`, and `str_to_lower()`. These are indispensable for real-world data where text columns arrive messy and inconsistent.
+
+- **`case_when()`** as a replacement for nested `ifelse()` — Once you see `case_when()`, you can never go back. It reads like plain English and handles multiple conditions cleanly without the bracket-nesting nightmare.
+
+::: callout-tip
+## Key Takeaway
+`across()` combined with `where(is.numeric)` is one of the most efficient patterns in modern Tidyverse. It collapses what used to be 10 lines of code into 2.
+:::
+
+These additions feel less like new tools and more like upgrades to tools I already owned. The conceptual shift was that M05 taught me *what* the Tidyverse can do, and M06 started teaching me *how to do it efficiently at scale*.
+
+---
+
+## David Robinson's Impromptu Screencast — Step 2 {#sec-robinson}
+
+**Prompt:** *What do you think about David Robinson's impromptu screencast performance in Step 2? How much were you able to understand?*
+
+Watching David Robinson work through a dataset in real time is equal parts inspiring and humbling. What struck me first was the *pace* — he types at the speed of thought, which makes it clear that for him, `dplyr` syntax is not something he looks up; it is internalized, like a spoken language. He barely pauses between ideas.
+
+::: {.panel-tabset}
+
+### What I Understood
+
+I was able to follow the general logic of his workflow pretty well. The structure load the data, inspect it, filter out noise, group and summarize, then visualize — maps onto what I learned in M05 and M06. When he used `count()`, `fct_reorder()`, or a quick `ggplot2` chain, I could keep up with what he was *trying* to accomplish even when I didn't recognize every function name.
+
+### What Was Over My Head
+
+Where I fell behind was in his use of higher-order functions and some of the more specialized `tidyr` / `purrr` patterns. He would reach for a function like `unnest()` or a regex pattern almost reflexively, and my brain couldn't parse it fast enough to understand both the *what* and the *why* simultaneously. I also noticed he rarely consults documentation — he has an internal model of the API that I haven't built yet.
+
+### My Reaction
+
+It was motivating rather than discouraging. Robinson's performance is a clear picture of what fluency looks like — not memorizing syntax, but having an intuition for how data is shaped and what you need to do to reshape it. That kind of fluency only comes from repetition. The screencast was less a tutorial and more a demonstration of a destination.
+
+:::
+
+The professor's note about pausing the video and typing out Robinson's code resonates with me. There is something about physically reproducing code — not copy-pasting, but *typing* that forces attention to every detail and builds muscle memory that simply watching never does.
+
+---
+
+## The Two-Stage Cleaning Process — Step 3 {#sec-cleaning}
+
+**Prompt:** *In Step 3, you saw two videos, one showing initial data cleaning and the other showing further cleaning. Describe the two processes. What are the big differences between the two? How do the differences result in differences in final sample size?*
+
+The two videos in Step 3 documented a real COVID-19 hospitality study conducted by the professor, where data was collected via **Prolific** (a consumer panel platform) and **Qualtrics** (a survey tool) across two waves in November–December 2023. The cleaning happened in two fundamentally different stages.
+
+### Video 1 — Initial Cleaning: Participant-Level Filtering
+
+The first video focused on **who** stays in the dataset. The study used a two-survey design: a short screening survey (about 2 minutes) followed by a longer main study. Participants had to meet specific eligibility criteria to move from one to the other:
+
+- Must be **18 years or older**
+- Must have **visited a coffee shop** during the peak of the pandemic and stayed at least **15 minutes**
+
+Only about **25% of screening respondents** were eligible and invited to the main study — meaning roughly 3 out of 4 people screened out before even taking the main survey. Of those invited, participation was very high (~95%).
+
+The raw Prolific data came in two CSV files — Wave 1 (812 participants) and Wave 2 (300 participants) — which were read into R and combined. The Qualtrics data arrived as an **SPSS `.sav` file** with **1,185 rows and 209 variables**, read using `haven::read_sav()`. The professor then joined the Prolific demographic/status data with the Qualtrics response data.
+
+From there, initial filtering removed:
+
+- Participants who **failed the coffee shop visit question in the main study** after having passed it in the screening (some people contradicted themselves, costing the research team money since they had already been paid)
+- Participants whose **status** was not "Approved" (or acceptable equivalents like timed-out but usable responses)
+- Anyone who **failed attention or comprehension check questions** — items designed to confirm the respondent was a real, attentive human
+
+::: callout-note
+## The Duplicate ID Edge Case
+One interesting finding: 799 unique IDs were detected out of 800 expected — meaning one ID appeared twice. Upon inspection, these were clearly two different people (one on the West Coast, one on the East Coast, with completely different response patterns). The professor made the judgment call to **retain both records** since no foul play was apparent. This is a reminder that data cleaning always involves human judgment, not just code.
+:::
+
+### Video 2 — Further Cleaning: Variable-Level Recoding
+
+The second video shifted from *who* to *what* — specifically, fixing problems within the variables themselves for the subset of questions relevant to each student's chosen analytical topic. Two major issues were addressed:
+
+**1. Reverse-coded items**
+
+Some survey questions were intentionally worded in the *opposite* direction of the construct being measured. For example, in a germ aversion scale, one item asked "It really bothers me when people sneeze without covering their mouths" (higher = more aversive ✓), but another asked "I'm comfortable sharing a water bottle with a friend" (higher = *less* aversive ✗). The second item needs to be reversed so that high values consistently mean high germ aversion. The fix: subtract the variable from 8 (for a 1–7 scale), which mirrors the values around the midpoint.
+
+**2. Miscoded Likert scale values**
+
+Several variables had the wrong numbers assigned — for example, a 1–7 scale where values 2 and 3 were entirely missing, or where the label "Strongly Agree" was mapped to the *highest* number but the response intent required it to be the *lowest*. These had to be recoded so that scale values were consecutive and labels matched the intended direction.
+
+Tools used in this phase included `haven`, `janitor`, `sjPlot::view_df()` (for a data dictionary), and `psych::describe()` for summary statistics. The professor also demonstrated creating a **custom reusable function** for running `count()` + percent calculations across many variables — a practical solution for checking dozens of items efficiently.
+
+::: callout-important
+## How These Two Passes Affect Sample Size Differently
+
+The first video's cleaning is **row-level** — it removes entire participants who don't belong in the study. This is where the biggest absolute drops in sample size occur, because eligibility criteria and quality checks are applied to every person.
+
+The second video's cleaning is **column-level** it doesn't remove participants but instead corrects the *values* within their responses. However, recoding errors can still indirectly affect sample size: if certain variables become analytically unusable due to unresolvable coding errors, cases with missing or corrupted values on key variables may be dropped during analysis. The combined effect of both passes is that the final analytical sample can be considerably smaller than the 1,185 rows in the raw Qualtrics file.
+:::
+
+In short, Video 1 asks: *"Are these the right people?"* Video 2 asks: *"Are their responses recorded correctly?"* Both questions are essential — and neither can substitute for the other.
+
+---
+
+## RevealJS Presentations — Impressions from Step 4 {#sec-revealjs}
+
+**Prompt:** *In Step 4, you learned how to create a RevealJS presentation. What's your impression of the RevealJS presentation? Describe its capabilities as you learned from the video. What are its strengths and weaknesses compared with PPT?*
+
+Coming from a background where PowerPoint is essentially the default presentation format in professional and academic settings, RevealJS felt like switching from a sedan to a sports car — more capable in specific conditions, but with a different set of tradeoffs.
+
+### Capabilities
+
+RevealJS presentations are HTML-based slides built directly inside a Quarto document. Capabilities I noted from the video include:
+
+| Feature | Description |
+|---|---|
+| **Speaker notes** | Hidden from the audience, displayed on a presenter's second screen |
+| **Slide transitions** | Configurable animations between slides |
+| **Nested slides** | Vertical "stacks" of sub-slides beneath main horizontal slides |
+| **Code highlighting** | Syntax-highlighted, executable code blocks right on the slide |
+| **Web hosting** | Publishable to GitHub Pages as a URL — no file attachment needed |
+| **Fragments** | Content that appears incrementally on click, similar to PPT animations |
+| **Themes** | Built-in CSS themes (moon, sky, serif, etc.) |
+
+: RevealJS Feature Summary {#tbl-revealjs}
+
+See @tbl-revealjs for a summary of the main capabilities.
+
+### Strengths vs. PowerPoint
+
+::: {.callout-note}
+## RevealJS Strengths
+1. **Reproducibility** — the presentation lives in the same `.qmd` file as your analysis. No copy-pasting of outputs.
+2. **Version control** — since it's plain text, it works natively with Git. Tracking changes is trivial.
+3. **Web-native** — sharing is a URL, not an email attachment. Always the latest version.
+4. **Code integration** — you can show *and run* code in the presentation itself, which is unmatched in PPT.
+:::
+
+::: {.callout-warning}
+## RevealJS Weaknesses
+1. **Learning curve** — YAML configuration and markdown syntax add friction for non-coders.
+2. **Visual design ceiling** — PPT gives you pixel-level control over layout; RevealJS is more constrained unless you write custom CSS.
+3. **Audience expectations** — in corporate environments, a browser-based slide deck can feel unfamiliar or cause technical friction during live presentations.
+4. **Complex graphics** — inserting a custom infographic or precise diagram is easier in PPT's drag-and-drop environment.
+:::
+
+My honest take: RevealJS is the better choice for technical and academic audiences where the content *is* code or data, and where reproducibility matters. For a sales pitch, a marketing deck, or any setting where design and animation polish are judged, PowerPoint still has an edge.
+
+---
+
+## My RevealJS Presentation — Step 5 {#sec-mypres}
+
+**Prompt:** *In Step 5, you were asked to create a RevealJS presentation. Provide a link to the presentation you published on the web. Briefly describe what the presentation is about. What did you learn from the experience?*
+
+::: callout-note
+## Published Presentation
+🔗 **[View Presentation on GitHub Pages](https://aiyonpeoples.github.io/M06-revealjs-presentation)**
+
+*(Replace this URL with your actual published GitHub Pages link before submitting.)*
+:::
+
+### What the Presentation Covers
+
+For this assignment, I built a RevealJS presentation walking through a brief exploratory data analysis of the `nycflights13` dataset. The slides cover:
+
+1. An overview of the dataset and the analytical question
+2. A data cleaning summary — which records were filtered and why
+3. Two visualization slides (departure delay distribution and carrier-level comparisons)
+4. A concluding slide with key takeaways and limitations
+
+The presentation was intentionally kept concise — around 8 slides — to focus on getting the publishing workflow right rather than maximizing analytical depth.
+
+### What I Learned
+
+The most valuable lesson was not in the slides themselves but in the **deployment pipeline**. Getting a file rendered in Positron, pushed to a GitHub repository, and published via GitHub Pages required understanding how Quarto's output directory maps to Pages' expected file structure. Once I had that mental model, the process clicked.
+
+I also learned that RevealJS forces you to think differently about information density. A Quarto HTML report lets you write as much as you want — the reader scrolls. A slide imposes a hard spatial constraint. Deciding what belongs on a slide versus what belongs in speaker notes is a genuine editorial skill, and this assignment pushed me to practice it.
+
+---
+
+## Advanced Wrangling Concepts — Three Functions from Step 6 {#sec-wrangling}
+
+**Prompt:** *My advanced wrangling lecture in Step 6 introduced new concepts not covered in M05, such as joining relational databases. Pick three of them, describe when to use them, and give one coding example along with an output for each function.*
+
+The three concepts I found most significant — and most immediately useful — are relational joins, `pivot_longer()` / `pivot_wider()`, and `separate()` / `unite()`.
+
+---
+
+### Concept 1: Relational Joins (`left_join`, `inner_join`)
+
+**When to use it:** Any time your data lives across multiple tables and you need to bring it together by a shared key. In the real world, this is almost always — transaction data lives in one table, customer info in another, product details in a third. Joins are how you assemble the picture.
+
+A `left_join()` keeps all rows from the left table and brings in matching columns from the right. An `inner_join()` keeps only rows that have a match in *both* tables.
+
+```{r joins-demo}
+# Using nycflights13: join flights with airline names
+flights_named <- flights |>
+  left_join(airlines, by = "carrier") |>
+  select(year, month, day, carrier, name, dep_delay, arr_delay) |>
+  rename(airline = name)
+
+head(flights_named, 5)
+```
+
+The output above shows that we've pulled the full airline name (`airline`) from the `airlines` table into the `flights` table using `carrier` as the key. Without the join, we'd only have the two-letter code.
+
+---
+
+### Concept 2: `pivot_longer()` — Reshaping Wide to Tall
+
+**When to use it:** When your data has multiple columns that represent the same *type* of measurement across different conditions or time points. Tidy data principle says each observation should be a row. If you have columns like `Q1_sales`, `Q2_sales`, `Q3_sales`, `Q4_sales`, those four columns are really one variable (`sales`) measured at four time points.
+
+```{r pivot-longer-demo}
+# Create a small wide dataset: mean dep_delay and arr_delay per carrier
+delay_wide <- flights |>
+  group_by(carrier) |>
+  summarize(
+    dep_delay = mean(dep_delay, na.rm = TRUE),
+    arr_delay = mean(arr_delay, na.rm = TRUE)
+  ) |>
+  slice_head(n = 5)
+
+delay_wide
+
+# Pivot to long format — one row per carrier-delay_type combination
+delay_long <- delay_wide |>
+  pivot_longer(
+    cols = c(dep_delay, arr_delay),
+    names_to = "delay_type",
+    values_to = "avg_minutes"
+  )
+
+delay_long
+```
+
+Notice how `delay_wide` had 5 rows (one per carrier) with 2 delay columns, and `delay_long` now has 10 rows (two per carrier — one for each delay type). This long format makes it trivially easy to group by `delay_type` or map it to a `ggplot2` aesthetic like `color`.
+
+---
+
+### Concept 3: `separate()` — Splitting One Column into Multiple
+
+**When to use it:** When a single column contains two or more pieces of information crammed together — a common artifact of messy real-world data. For example, a column called `date` formatted as `"2024-03"` that contains both year and month, or a `name` column with `"LastName, FirstName"`.
+
+```{r separate-demo}
+# flights$time_hour contains date-time; let's extract it into components
+# First, create a demo column that mimics a common "messy" format
+demo_df <- flights |>
+  select(carrier, flight, time_hour) |>
+  mutate(date_str = format(time_hour, "%Y-%m-%d")) |>  # "2013-01-01"
+  slice_head(n = 6)
+
+demo_df |>
+  separate(col = date_str,
+           into = c("year_parsed", "month_parsed", "day_parsed"),
+           sep = "-")
+```
+
+The `separate()` call splits the `date_str` column at every `-` character and deposits the three resulting pieces into `year_parsed`, `month_parsed`, and `day_parsed`. Its counterpart, `unite()`, does the reverse — merging multiple columns into one with a specified separator.
+
+::: callout-tip
+## Rule of Thumb for Joins vs. Pivots vs. Separate
+
+- Use **joins** when your data is spread across *tables*.
+- Use **pivots** when your data is spread across *columns* (wide → tall or tall → wide).
+- Use **separate/unite** when your data is crammed *within a single column*.
+:::
+
+---
+
+## Reflections on Wrangling — The Basement Analogy {#sec-reflection}
+
+**Prompt:** *Data wrangling is like laying a foundation/basement for a building... What did you like the most about working with the tools you learned in this module? Elaborate on your point.*
+
+The basement analogy is one of the most accurate descriptions of data work I've encountered. My background is in marketing — brand storytelling, campaign strategy, consumer psychology — and in that world, the output is almost always visible and judged immediately. A great ad gets noticed. A great deck wins the room. Wrangling has no such moment. You clean a dataset, and if you did it right, nobody says anything because the downstream analysis just... works. It is foundational labor in the truest sense.
+
+What I found genuinely exciting about this module  despite that invisibility — is **the precision it gives you over the data's shape**. I come from a world where a lot of data analysis happens in Excel, where manipulation is manual, opaque, and nearly impossible to audit or reproduce. The fact that every transformation in a `dplyr` pipeline is an explicit, readable, and reproducible step feels like a superpower by comparison. 
+
+The function I liked most was `across()`. It captures something I value in all domains: **don't do manually what you can automate systematically**. When I ran a mutation across ten columns in a single call that would have taken ten separate lines — or ten minutes of Excel dragging — I felt the efficiency viscerally. That kind of leverage is addictive.
+
+I also genuinely appreciate the **pipeline syntax** (`|>` or `%>%`). It mirrors how I naturally think about data: start with the raw material, apply one transformation, then the next, then the next. Reading a well-written pipe is like reading a recipe. It has a logical narrative arc.
+
+---
+
+## Challenges and the Path Forward {#sec-challenges}
+
+**Prompt:** *What seems to be the challenge, if any, for you when you try to master the wrangling tools? How may you be able to overcome the challenge?*
+
+My biggest challenge is not syntax retention — it is **knowing which tool to reach for when I'm staring at a novel problem**. When I do an assigned exercise, the context is clear: the prompt tells me implicitly whether I need a join, a pivot, or a filter. In the real world — and I feel this acutely running the app and making data-driven decisions for the gym — the problem arrives without labels. It takes pattern recognition to look at a messy spreadsheet and immediately know "this is a pivot_longer situation" versus "this needs a join."
+
+The second challenge is **debugging intuition**. When a pipe produces an unexpected output, I sometimes don't know where to look. Should I inspect the data mid-pipe? Is it a join key mismatch? A silent `NA` propagation? Building the instinct for where to break a pipeline and how to read intermediate outputs is a skill I'm still developing.
+
+::: callout-caution
+## My Strategy for Improvement
+
+Inspired by the professor's note about Robinson's video: I plan to pick one real dataset per week — something connected to the gym's operations or the app's usage data — and wrangle it from raw to analysis-ready without a tutorial scaffold. The constraint of a real question forces me to make real decisions about tool selection. I'll also revisit Robinson's screencasts periodically as a benchmark for fluency, not as a tutorial.
+:::
+
+The broader lesson I'm taking from this module is that mastery of wrangling is less about memorizing functions and more about developing a mental model of *data shapes* — understanding what form your data is in, what form you need it to be in, and which transformation bridges the gap. Once that model is strong, the syntax becomes secondary.[^1]
+
+---
+
+*Report prepared with Quarto Published to GitHub Pages.*
+
+🔗 **Published report:** [https://ioniclabs-inc.github.io/M06-reflection/M06-reflection.html](https://ioniclabs-inc.github.io/M06-reflection/M06-reflection.html)

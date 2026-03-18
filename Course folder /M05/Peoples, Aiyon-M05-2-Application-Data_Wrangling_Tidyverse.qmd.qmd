@@ -1,0 +1,519 @@
+---
+title: "M05-2-Application: Data Wrangling with Tidyverse in R"
+author: "Aiyon Peoples"
+date: '`r format(Sys.time())`'
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    number-sections: true
+    code-line-numbers: true
+    code-fold: false
+    code-link: true
+    embed-resources: true
+    df-print: paged
+editor: visual
+execute:
+  freeze: auto
+  warning: false
+  error: true
+---
+
+```{r loading packages}
+#install.packages("tidyverse")
+#install.packages("nycflights13")
+#install.packages("skimr")
+#install.packages("gt")
+#install.packages("gtExtras")
+#install.packages("skimr")
+library(tidyverse)
+library(nycflights13)
+library(skimr)
+library(gt)
+library(gtExtras)
+```
+
+# Ex 1.
+
+Create a new project called "M05_02". Inside this project, create a new Quarto Markdown file called "M05-2-Data_Wrangling_Tidyverse.qmd".
+
+## 1.1. Convert airquality to tibble and data frame
+
+Using the Tidyverse library, set the built-in "airquality" dataset to a tibble format named "air.tib." Confirm that the operation was successful. Next, create a new data frame from "air.tib" and assign "air.df" to the data frame. Confirm that the operation was successful.
+
+```{r ex1-1}
+# Convert airquality to tibble
+air.tib <- as_tibble(airquality)
+air.tib
+
+# Confirm it is a tibble
+class(air.tib)
+
+# Convert tibble to data frame
+air.df <- as.data.frame(air.tib)
+air.df
+
+# Confirm it is a data frame
+class(air.df)
+```
+
+## 1.2. Filter Ozone when Temperature is 97
+
+Using the tibble created earlier, find the Ozone amount when the temperature was 97. Show this by both subsetting the entire row and pinpointing the Ozone element only. Also, for both ways, use Base R approach as well as Tidyverse approach.
+
+```{r ex1-2}
+# --- Base R: Subset entire row ---
+air.tib[air.tib$Temp == 97, ]
+
+# --- Base R: Pinpoint Ozone element only ---
+air.tib$Ozone[air.tib$Temp == 97]
+
+# --- Tidyverse: Subset entire row ---
+air.tib |> 
+  filter(Temp == 97)
+
+# --- Tidyverse: Pinpoint Ozone element only ---
+air.tib |> 
+  filter(Temp == 97) |> 
+  select(Ozone)
+```
+
+------------------------------------------------------------------------
+
+# Ex 2.
+
+Use "flights" data for this exercise.
+
+## 2.1. Top 10 worst arrival delays per day, then average delay per month
+
+Select only the top 10 worst arrival delays for each day for each month for each year. Using the subset of the data, calculate the average delay for each month regardless of the dates or years.
+
+```{r ex2-1}
+avg_delay_by_month <- flights |> 
+  group_by(year, month, day) |> 
+  slice_max(order_by = arr_delay, n = 10, na_rm = TRUE) |> 
+  ungroup() |> 
+  group_by(month) |> 
+  summarize(avg_delay = mean(arr_delay, na.rm = TRUE), .groups = "drop")
+
+avg_delay_by_month
+```
+
+## 2.2. Visualize average arrival delays by month
+
+```{r ex2-2}
+avg_delay_by_month |> 
+  mutate(month = factor(month, levels = 1:12,
+                        labels = month.abb)) |> 
+  ggplot(aes(x = month, y = avg_delay, fill = avg_delay)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_gradient(low = "steelblue", high = "firebrick") +
+  theme_bw() +
+  labs(title = "Average Top-10 Worst Arrival Delays by Month",
+       subtitle = "Based on top 10 worst daily delays from NYC airports (2013)",
+       caption = "Source: nycflights13",
+       x = "Month",
+       y = "Average Arrival Delay (minutes)")
+```
+
+## 2.3. Insights from the data
+
+Based on the chart above, delays tend to peak during the summer months (June and July) and again in December, likely due to high travel demand and adverse weather conditions. The winter months of January and February also show elevated delays, consistent with winter storms. September and October appear to have the lowest average delays among the top 10 worst daily delays, suggesting these months have comparatively better on-time performance.
+
+------------------------------------------------------------------------
+
+# Ex 3.
+
+The goal is to visualize the `relig_income` data. Work through the sub-questions step by step.
+
+## 3.1. Explore relig_income data
+
+Take a look at the built-in data frame "relig_income" from the tidyr package. Perform built-in functions to understand the data.
+
+```{r ex3-1}
+relig_income
+
+class(relig_income)
+dim(relig_income)
+glimpse(relig_income)
+skimr::skim(relig_income)
+```
+
+The data is a tibble with 18 rows and 11 variables. The rows represent different religions and the columns represent income brackets. The values in each cell appear to be counts (frequencies).
+
+## 3.2. Look up relig_income in Help
+
+```{r ex3-2}
+#help(relig_income)
+```
+
+The `relig_income` dataset from the tidyr package contains survey data from Pew Research on the income distribution of various religious groups in the US. Each row is a religion, and the columns (other than "religion") are income brackets. The cell values are the number of survey respondents in each religion-income combination.
+
+## 3.3. Is the current data tidy? How should it be reshaped?
+
+The current data is **not tidy**. Tidy data requires that (1) each observation occupies its own row and (2) each variable has its own column. In the current wide format, the income brackets are spread across multiple columns rather than being stored as values in a single "income" variable. Each row represents a religion with 10 income bracket counts spread horizontally, meaning each religion-income combination is not its own unique observation (row). To support a visualization of income distribution by religion, the data should be reshaped from **wide to long** format using `pivot_longer()`, resulting in three columns: "religion", "income", and "count".
+
+## 3.4. Reshape data and visualize
+
+```{r ex3-4}
+relig_income_longer <- relig_income |> 
+  pivot_longer(
+    cols = -religion,
+    names_to = "income",
+    values_to = "count"
+  ) |> 
+  filter(income != "Don't know/refused")
+
+relig_income_longer
+
+# Visualization
+relig_income_longer |> 
+  ggplot(aes(x = income, y = count, fill = income)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ religion, scales = "free_y") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6)) +
+  labs(title = "Income Distribution by Religion",
+       caption = "Source: Pew Research / tidyr::relig_income",
+       x = "Income Bracket",
+       y = "Count")
+```
+
+## 3.5. One chain of code: wrangle and visualize
+
+```{r ex3-5}
+relig_income |> 
+  pivot_longer(
+    cols = -religion,
+    names_to = "income",
+    values_to = "count"
+  ) |> 
+  filter(income != "Don't know/refused") |> 
+  ggplot(aes(x = income, y = count, fill = income)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ religion, scales = "free_y") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6)) +
+  labs(title = "Income Distribution by Religion",
+       caption = "Source: Pew Research / tidyr::relig_income",
+       x = "Income Bracket",
+       y = "Count")
+```
+
+------------------------------------------------------------------------
+
+# Ex 4.
+
+The goal is to visualize the `us_rent_income` data. Work through the sub-questions step by step.
+
+## 4.1. Explore us_rent_income data
+
+```{r ex4-1}
+us_rent_income
+
+class(us_rent_income)
+dim(us_rent_income)
+glimpse(us_rent_income)
+skimr::skim(us_rent_income)
+```
+
+The data is a tibble with 104 rows and 5 variables. It contains both income and rent estimates for each US state, stored in a long format where each state appears in two rows — one for income and one for rent.
+
+## 4.2. Look up us_rent_income in Help
+
+```{r ex4-2}
+#help(us_rent_income)
+```
+
+The `us_rent_income` dataset from the tidyr package contains 2017 American Community Survey data on median yearly income and monthly rent by US state. The variables are: **GEOID** (state identifier), **NAME** (state name), **variable** (either "income" or "rent"), **estimate** (the median estimate), and **moe** (margin of error for the estimate).
+
+## 4.3. Is the current data tidy for a rent vs. income comparison?
+
+The current data is in **long format** but is **not ideal for visualizing the relationship between income and rent across states**. For a scatter plot comparing income and rent per state, we need both values in the same row — income and rent as separate columns. Currently, each state appears in two rows (one for income, one for rent), which means we cannot directly map income to one axis and rent to the other. To support this visualization goal, the data should be reshaped from **long to wide** format using `pivot_wider()`, so that each state is represented by a single row with separate columns for `estimate_income`, `estimate_rent`, `moe_income`, and `moe_rent`.
+
+## 4.4. Reshape data and visualize
+
+```{r ex4-4}
+us_rent_income_wider <- us_rent_income |> 
+  pivot_wider(
+    names_from = variable,
+    values_from = c(estimate, moe)
+  )
+
+us_rent_income_wider
+
+# Visualization
+us_rent_income_wider |> 
+  ggplot(aes(x = estimate_income, y = estimate_rent, label = NAME)) +
+  geom_point(color = "steelblue", size = 2) +
+  geom_smooth(method = "lm", se = FALSE, color = "firebrick") +
+  geom_text(size = 2.5, vjust = -0.6, check_overlap = TRUE) +
+  theme_bw() +
+  labs(title = "Median Income vs. Monthly Rent by US State (2017)",
+       caption = "Source: American Community Survey / tidyr::us_rent_income",
+       x = "Median Annual Income ($)",
+       y = "Median Monthly Rent ($)")
+```
+
+## 4.5. One chain of code: wrangle and visualize
+
+```{r ex4-5}
+us_rent_income |> 
+  pivot_wider(
+    names_from = variable,
+    values_from = c(estimate, moe)
+  ) |> 
+  ggplot(aes(x = estimate_income, y = estimate_rent, label = NAME)) +
+  geom_point(color = "steelblue", size = 2) +
+  geom_smooth(method = "lm", se = FALSE, color = "firebrick") +
+  geom_text(size = 2.5, vjust = -0.6, check_overlap = TRUE) +
+  theme_bw() +
+  labs(title = "Median Income vs. Monthly Rent by US State (2017)",
+       caption = "Source: American Community Survey / tidyr::us_rent_income",
+       x = "Median Annual Income ($)",
+       y = "Median Monthly Rent ($)")
+```
+
+------------------------------------------------------------------------
+
+# Ex 5.
+
+```{r ex5-setup}
+mba <- data.frame(
+  player = c('A', 'A', 'B', 'B', 'C', 'C'),
+  year   = c(1, 2, 1, 2, 1, 2),
+  stats  = c('22/2/3', '29/3/4', '18/6/7', '11/1/2', '12/1/1', '19/2/4')
+)
+
+mba
+```
+
+## 5.1. Separate stats column into points, assists, and steals
+
+```{r ex5-1}
+mba_sep <- mba |> 
+  separate(stats,
+           into = c("points", "assists", "steals"),
+           sep = "/")
+
+mba_sep
+```
+
+## 5.2. Unite points, assists, and steals back into one column
+
+```{r ex5-2}
+mba_uni <- mba_sep |> 
+  unite(col = "stats",
+        points, assists, steals,
+        sep = "/")
+
+mba_uni
+```
+
+------------------------------------------------------------------------
+
+# Ex 6.
+
+Use the "flights" data.
+
+## 6.1. Latest first departure day per month, displayed in a gt table
+
+Filter out canceled flights. For each day, calculate the first and last departure times. Then, for each month, select the day where the first flight departure was the latest.
+
+```{r ex6-1}
+flights |> 
+  filter(!is.na(dep_time)) |> 
+  group_by(year, month, day) |> 
+  summarize(
+    first_dep = min(dep_time, na.rm = TRUE),
+    last_dep  = max(dep_time, na.rm = TRUE),
+    n         = n(),
+    .groups = "drop"
+  ) |> 
+  group_by(month) |> 
+  filter(first_dep == max(first_dep)) |> 
+  ungroup() |> 
+  arrange(desc(first_dep)) |> 
+  gt() |> 
+  tab_header(
+    title    = "Day with Latest First Departure per Month",
+    subtitle = "NYC Airports, 2013 — Non-canceled flights only"
+  ) |> 
+  cols_label(
+    year      = "Year",
+    month     = "Month",
+    day       = "Day",
+    first_dep = "First Departure",
+    last_dep  = "Last Departure",
+    n         = "# of Flights"
+  ) |> 
+  gt_theme_guardian()
+```
+
+## 6.2. Top 5 destinations by carrier flight count
+
+```{r ex6-2}
+flights |> 
+  count(carrier, dest, sort = TRUE) |> 
+  group_by(carrier) |> 
+  slice_max(order_by = n, n = 1) |> 
+  ungroup() |> 
+  arrange(desc(n)) |> 
+  slice_head(n = 5) |> 
+  gt() |> 
+  tab_header(
+    title    = "Top 5 Carrier-Destination Combinations",
+    subtitle = "By total number of flights from NYC (2013)"
+  ) |> 
+  cols_label(
+    carrier = "Carrier",
+    dest    = "Destination",
+    n       = "# of Flights"
+  ) |> 
+  gt_theme_guardian()
+```
+
+The top destinations are dominated by carriers flying to high-traffic hubs (e.g., Atlanta, Chicago, Boston), which makes sense given that NYC airports serve as major connecting points. The findings align with expectations about US domestic air traffic patterns.
+
+------------------------------------------------------------------------
+
+# Ex 7.
+
+Using "air.tib", find missing values in Solar.R, replace them with the column mean, and confirm no missing values remain.
+
+```{r ex7}
+# Count missing values and percentage
+air.tib |> 
+  summarize(
+    missing_count   = sum(is.na(Solar.R)),
+    missing_percent = mean(is.na(Solar.R)) * 100
+  )
+
+# Create Solar_Mean and replace NAs
+Solar_Mean <- mean(air.tib$Solar.R, na.rm = TRUE)
+Solar_Mean
+
+air.tib <- air.tib |> 
+  mutate(Solar.R = if_else(is.na(Solar.R), Solar_Mean, Solar.R))
+
+# Confirm no more missing values
+air.tib |> 
+  summarize(missing_count = sum(is.na(Solar.R)))
+
+air.tib
+```
+
+------------------------------------------------------------------------
+
+# Ex 8.
+
+Visualize the monthly total temperature from air.tib using a barplot with Month on the y-axis and total temperature on the x-axis.
+
+```{r ex8}
+# Method 1: Using count() with wt argument
+air.tib |> 
+  count(Month, wt = Temp, name = "total_temp") |> 
+  mutate(
+    Month = case_when(
+      Month == 5 ~ "May",
+      Month == 6 ~ "June",
+      Month == 7 ~ "July",
+      Month == 8 ~ "August",
+      Month == 9 ~ "September"
+    ),
+    Month = fct_reorder(Month, desc(total_temp))
+  ) |> 
+  ggplot(aes(x = total_temp, y = Month, fill = Month)) +
+  geom_col(show.legend = FALSE) +
+  theme_bw() +
+  labs(title = "Total Monthly Temperature",
+       caption = "Source: airquality dataset",
+       x = "Total Temperature (°F)",
+       y = NULL)
+
+# Method 2: Using group_by() and summarize()
+air.tib |> 
+  group_by(Month) |> 
+  summarize(total_temp = sum(Temp), .groups = "drop") |> 
+  mutate(
+    Month = case_when(
+      Month == 5 ~ "May",
+      Month == 6 ~ "June",
+      Month == 7 ~ "July",
+      Month == 8 ~ "August",
+      Month == 9 ~ "September"
+    ),
+    Month = fct_reorder(Month, desc(total_temp))
+  ) |> 
+  ggplot(aes(x = total_temp, y = Month, fill = Month)) +
+  geom_col(show.legend = FALSE) +
+  theme_bw() +
+  labs(title = "Total Monthly Temperature (Method 2)",
+       caption = "Source: airquality dataset",
+       x = "Total Temperature (°F)",
+       y = NULL)
+```
+
+------------------------------------------------------------------------
+
+# Ex 9.
+
+Group air.tib by Month, find the maximum temperature per month, and visualize.
+
+```{r ex9}
+air.tib |> 
+  group_by(Month) |> 
+  summarize(max_temp = max(Temp, na.rm = TRUE), .groups = "drop") |> 
+  mutate(
+    Month = case_when(
+      Month == 5 ~ "May",
+      Month == 6 ~ "June",
+      Month == 7 ~ "July",
+      Month == 8 ~ "August",
+      Month == 9 ~ "September"
+    ),
+    Month = fct_reorder(Month, desc(max_temp))
+  ) |> 
+  ggplot(aes(x = Month, y = max_temp, fill = Month)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = max_temp), vjust = -0.5, size = 4) +
+  theme_bw() +
+  labs(title = "Maximum Temperature by Month",
+       caption = "Source: airquality dataset",
+       x = "Month",
+       y = "Maximum Temperature (°F)")
+```
+
+------------------------------------------------------------------------
+
+# Ex 10.
+
+Create a new column "temp_wind" (Temp / Wind), then visualize Ozone vs. temp_wind, Ozone vs. Wind, and Ozone vs. Temp in a single faceted chart.
+
+```{r ex10}
+air.tib |> 
+  mutate(temp_wind = Temp / Wind) |> 
+  select(Ozone, Temp, Wind, temp_wind) |> 
+  pivot_longer(
+    cols      = c(Temp, Wind, temp_wind),
+    names_to  = "predictor",
+    values_to = "value"
+  ) |> 
+  mutate(predictor = factor(predictor,
+                            levels = c("temp_wind", "Temp", "Wind"),
+                            labels = c("Temp / Wind (Combined)",
+                                       "Temperature (°F)",
+                                       "Wind Speed (mph)"))) |> 
+  ggplot(aes(x = value, y = Ozone)) +
+  geom_point(color = "steelblue", alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "firebrick") +
+  facet_wrap(~ predictor, scales = "free_x") +
+  theme_bw() +
+  labs(title = "Ozone vs. Temperature, Wind, and Temp/Wind Ratio",
+       subtitle = "The combined Temp/Wind variable shows a stronger association with Ozone",
+       caption = "Source: airquality dataset",
+       x = "Predictor Value",
+       y = "Ozone (ppb)")
+```
+
+The combined `temp_wind` variable (Temp divided by Wind) shows a stronger positive relationship with Ozone than either Temp or Wind individually. This makes intuitive sense: high temperatures combined with low wind speeds create stagnant, hot conditions that favor ozone formation, while the ratio captures both effects simultaneously in a single predictor.

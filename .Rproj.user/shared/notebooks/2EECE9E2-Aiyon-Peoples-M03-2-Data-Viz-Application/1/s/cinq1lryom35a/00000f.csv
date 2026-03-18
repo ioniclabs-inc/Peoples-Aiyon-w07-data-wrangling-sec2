@@ -1,0 +1,4 @@
+"0","# install.packages(""wooldridge"")"
+"0","library(wooldridge)"
+"0","data(attend)"
+"0","df <- as_tibble(attend)"

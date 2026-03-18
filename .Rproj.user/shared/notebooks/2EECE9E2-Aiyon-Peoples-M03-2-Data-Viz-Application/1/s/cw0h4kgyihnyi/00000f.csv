@@ -1,0 +1,3 @@
+"0","selected_vars <- df %>% select(attend, termGPA, priGPA, ACT, final, atndrte, hwrte)"
+"0",""
+"0","ggcorr(selected_vars)"

@@ -1,0 +1,288 @@
+---
+title: "Google Analytics 4 (GA4) Interactive Study Guide"
+subtitle: "Advanced Analysis, Configuration, and Event Tracking"
+output: 
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    toc_depth: 2
+---
+
+<style>
+  body {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  details {
+    border: 1px solid #d3d3d3;
+    border-radius: 6px;
+    padding: 0.5em 0.5em 0;
+    margin-bottom: 1.5em;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  summary {
+    font-weight: 600;
+    font-size: 1.1em;
+    margin: -0.5em -0.5em 0;
+    padding: 1em;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+  }
+  summary:hover {
+    background-color: #e9ecef;
+  }
+  details[open] {
+    padding: 1em;
+  }
+  details[open] summary {
+    border-bottom: 1px solid #d3d3d3;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: 1em;
+  }
+  .answer-box {
+    background-color: #eafaf1;
+    border-left: 5px solid #2ecc71;
+    padding: 15px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  .context-box {
+    padding: 10px 5px;
+  }
+  .context-box ul {
+    margin-top: 10px;
+  }
+</style>
+
+<br>
+<p><em>Click on any question below to reveal the correct answer and the underlying concepts.</em></p>
+<hr>
+
+## 1. Interface & Navigation
+
+<details>
+<summary>You want to find ready-made cards that address typical questions about how users are interacting with your app or website. Which section do you go to in order to find this?</summary>
+<div class="answer-box">
+  Correct Answer: You'd find it in the Reports section.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Insight-Driven Summaries:</strong> The Reports section is the "at-a-glance" hub. Google populates this area with ready-made cards (often found in the Reports Snapshot) that target typical business questions.</li>
+    <li><strong>Overview Reports:</strong> "Overview" reports for different categories (Acquisition, Engagement, etc.) are essentially collections of these summary cards.</li>
+  </ul>
+</div>
+</details>
+
+<details>
+<summary>You just added a feature to your website allowing users to sign up for a newsletter. Now, you want to mark new sign-up events as conversions and create an audience for people who signed up. Where in Google Analytics 4 would you go to manage events, conversions, and audiences?</summary>
+<div class="answer-box">
+  Correct Answer: Go to Admin.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Central Configuration:</strong> The Admin section is the command center for your property. While you view data in Reports and Explore, you configure how that data is categorized in Admin.</li>
+    <li><strong>Managing Events & Conversions:</strong> You navigate to Admin > Data display > Events to create custom events and toggle the switch to mark them as "Key Events" (conversions).</li>
+    <li><strong>Creating Audiences:</strong> You use the Audience Builder within the Admin panel to define groups of people based on specific events.</li>
+  </ul>
+</div>
+</details>
+
+<details>
+<summary>You want to find techniques that go beyond standard reports so you can uncover deeper insights about customer engagement. Which section of your Google Analytics property contains this?</summary>
+<div class="answer-box">
+  Correct Answer: It's in the Explore section.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Beyond Pre-Built Reports:</strong> The Explore section is an advanced workspace designed for deep-dive analysis and custom visualizations.</li>
+    <li><strong>Advanced Techniques:</strong> It contains specialized tools like Funnel exploration, Path exploration, and Segment overlap.</li>
+    <li><strong>Raw Data Manipulation:</strong> Allows you to drag and drop specific dimensions and metrics into free-form tables to spot hidden correlations.</li>
+  </ul>
+</div>
+</details>
+
+<details>
+<summary>You want to know what pages new users open most often after opening your home page, so you create a new path exploration in Explore that you plan to share with a co-worker. Who can see this new path exploration by default?</summary>
+<div class="answer-box">
+  Correct Answer: Just you; but you can share it with the other users of the property in read-only mode.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Private by Default:</strong> Explorations are strictly private by default to prevent cluttered workspaces and accidental data changes.</li>
+    <li><strong>Read-Only Sharing:</strong> When shared, co-workers can view the data and change date ranges for their own view, but cannot save changes to the original file.</li>
+    <li><strong>Ownership:</strong> If a colleague wants to edit the exploration, they must duplicate it to create their own editable copy.</li>
+  </ul>
+</div>
+</details>
+
+## 2. Data Measurement & Tracking
+
+<details>
+<summary>If you have created a Google Analytics 4 property for your mobile app and web site, how would Google Analytics measure and report distinct user interactions?</summary>
+<div class="answer-box">
+  Correct Answer: As events.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Universal Language:</strong> GA4 uses an event-based measurement model. Every single interaction (pageview, click, purchase) is recorded universally as an event across both web and app platforms.</li>
+    <li><strong>Rich Detail:</strong> Events carry parameters—additional data describing the action in detail.</li>
+  </ul>
+</div>
+</details>
+
+<details>
+<summary>Because you've set up your web data stream, your website is already feeding data to your Google Analytics property. You notice that enhanced measurement is enabled for the web data stream. What happens when this setting is enabled?</summary>
+<div class="answer-box">
+  Correct Answer: Additional events are collected from your website without you needing to change your website's code.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Automatic Tracking:</strong> Enhanced Measurement automatically detects and records common user interactions right out of the box.</li>
+    <li><strong>Key Events Tracked:</strong> This includes scrolls (90% depth), outbound clicks, site search queries, video engagement (YouTube embeds), and file downloads.</li>
+  </ul>
+</div>
+</details>
+
+<details>
+<summary>You've been collecting data on your point-of-sale system that could be used in conjunction with data you send to Google Analytics from your website and app. Which of these features allows you to collect and send events directly to Google Analytics servers?</summary>
+<div class="answer-box">
+  Correct Answer: Measurement Protocol.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Server-to-Server Communication:</strong> The Measurement Protocol sends data directly from any internet-connected device (like a POS system) to GA4 servers via HTTP requests.</li>
+    <li><strong>Offline-to-Online Bridge:</strong> It allows you to link offline physical interactions (like in-store purchases) back to online user journeys.</li>
+  </ul>
+</div>
+</details>
+
+## 3. Dimensions, Metrics & Properties
+
+<details>
+<summary>To understand how many users are coming from various devices, like computers or mobile phones, you run a report that shows this data, per device, over the past 30 days. In this report, which of these is considered a "metric" in Google Analytics?</summary>
+<div class="answer-box">
+  Correct Answer: How many users were on mobile phones.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Quantitative Data:</strong> Metrics are quantitative measurements—numbers that tell you "how many" or "how much" (e.g., volume of activity).</li>
+    <li><strong>Versus Dimensions:</strong> Things like "Device Category" (mobile, desktop) are Dimensions (descriptive text labels), whereas the count of users attached to those labels is the Metric.</li>
+  </ul>
+</div>
+</details>
+
+<details>
+<summary>You manage a company that installs swimming pools. You post a new how-to-video on your website about proper pool maintenance. Google Analytics has a lot of data about user interactions with this video. Which of these choices is a "user property" collected by Google Analytics?</summary>
+<div class="answer-box">
+  Correct Answer: The language preference of users watching the video on your site.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Static Characteristics:</strong> User properties describe the person interacting with your site, not the specific action they are taking. They are attributes that remain consistent across sessions.</li>
+    <li><strong>Automatic Collection:</strong> GA4 automatically collects standard user properties like Language, Country, and Device Model.</li>
+  </ul>
+</div>
+</details>
+
+<details>
+<summary>You are the managing editor of a blog that features several contributing writers. What could you use to report the writer's name on each article page?</summary>
+<div class="answer-box">
+  Correct Answer: Custom dimension.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Descriptive Attributes:</strong> Because a writer's name is a text-based attribute (a label) rather than a number, it must be tracked as a dimension.</li>
+    <li><strong>Custom Setup:</strong> Since GA4 does not track author names by default, you must set this up as an Event-scoped Custom Dimension attached to page views.</li>
+  </ul>
+</div>
+</details>
+
+## 4. Advanced Features & Integrations
+
+<details>
+<summary>After exporting Google Analytics data to BigQuery, what new opportunity do you have to use your data?</summary>
+<div class="answer-box">
+  Correct Answer: You can use SQL to query your data to answer questions and gain insights into your products, users, and channels.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Raw Data Access:</strong> BigQuery gives you access to raw, unsampled event-level data, bypassing the standard UI limitations.</li>
+    <li><strong>SQL Power:</strong> You can use Standard SQL to perform complex calculations and join your analytics data with external data sources (like CRM systems or offline sales logs).</li>
+  </ul>
+</div>
+</details>
+
+<details>
+<summary>When Google Analytics and Google ads are linked, how can Google Ads use conversion events from Google Analytics?</summary>
+<div class="answer-box">
+  Correct Answer: It can optimize bids for ad placements.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Smart Bidding:</strong> By importing GA4 Key Events directly into Google Ads, Google's algorithm uses that conversion data to automatically adjust bids in real-time.</li>
+    <li><strong>Performance Optimization:</strong> It ensures ad spend is optimized for the actions that actually matter to your business, rather than just optimizing for clicks.</li>
+  </ul>
+</div>
+</details>
+
+<details>
+<summary>Which of these tasks can be done using audience triggers?</summary>
+<div class="answer-box">
+  Correct Answer: Create new events based on an audience rule being satisfied.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Automation:</strong> An Audience Trigger allows you to fire a brand-new event automatically the exact moment a user meets the complex criteria required to join a specific audience.</li>
+    <li><strong>Key Event Mapping:</strong> This allows you to track complex, multi-step engagement milestones as actual conversion events.</li>
+  </ul>
+</div>
+</details>
+
+## 5. Specific Reporting Tools
+
+<details>
+<summary>Which events are accounted for in the Realtime report?</summary>
+<div class="answer-box">
+  Correct Answer: Events that took place within the last 30 minutes.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>The 30-Minute Window:</strong> By default, the Realtime report provides a minute-by-minute breakdown of active users and triggered events exclusively over the last 30 minutes.</li>
+    <li><strong>Validation Tool:</strong> It is highly effective for immediately testing new tracking setups or monitoring immediate traffic spikes after launching a campaign.</li>
+  </ul>
+</div>
+</details>
+
+<details>
+<summary>Which of these reports highlight how users behave on product detail pages based on the type of device they're using?</summary>
+<div class="answer-box">
+  Correct Answer: The Tech Details Report.
+</div>
+<div class="context-box">
+  <strong>Why this is correct:</strong>
+  <ul>
+    <li><strong>Device-Level Granularity:</strong> The Tech Details Report specifically breaks down engagement and conversion metrics by hardware and software parameters (Device category, Browser, OS).</li>
+    <li><strong>Performance Monitoring:</strong> It bridges the gap between user behavior and technical specifications, helping identify page layout or loading issues isolated to specific devices.</li>
+  </ul>
+</div>
+</details>

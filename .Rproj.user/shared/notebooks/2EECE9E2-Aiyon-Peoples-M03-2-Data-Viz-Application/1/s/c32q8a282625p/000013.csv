@@ -1,0 +1,5 @@
+"0",""
+"0","# Faceted"
+"0","ggplot(df_soph_relabled_summarized, aes(x = ACT, y = final_avg, fill = soph)) +"
+"0","  geom_bar(stat = ""identity"") +"
+"0","  facet_wrap(~soph)"

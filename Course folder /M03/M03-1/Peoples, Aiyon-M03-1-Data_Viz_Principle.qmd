@@ -1,0 +1,347 @@
+---
+title: "Module 3-1-Principle - Data Visualization with ggplot2 in R"
+author: "Aiyon Peoples"
+date: '`r format(Sys.time())`'
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    number-sections: true
+    code-line-numbers: true
+    code-fold: false
+    code-link: true
+    embed-resources: true
+    df-print: paged
+editor: visual
+  markdown: 
+    wrap: 72
+execute:
+  freeze: auto
+  warning: false
+  error: true
+---
+
+#install.packages("ggplot2") #install.packages('ggrepel') #install.packages('ggthemes') #install.packages('scales') #install.packages('plotly') #install.packages('lattice') #install.packages('GGally') #install.packages("dplyr") #install.packages("tidyverse") #install.packages('ggtext') #install.packages("glue") library(ggplot2) #visualization library(ggrepel) #labels for data library(ggthemes) #collections of themes library(scales) \# scale library(plotly) \# interactive chart library(GGally) \# correlation library(dplyr) \# data transformation library(tidyverse) \# mega package containing 8 packages library(ggtext) \# for text visualization library(glue) \# combining multiple component library(gapminder)\`\`\`
+
+# 1. Understand mtcars data
+
+## 1.1 Using Help
+
+`r ?mtcars`
+
+> A data frame with 32 observations on 11 (numeric) variables.
+
+-   \[, 1\] mpg Miles/(US) gallon
+-   \[, 2\] cyl Number of cylinders
+-   \[, 3\] disp Displacement (cu.in.)
+-   \[, 4\] hp Gross horsepower
+-   \[, 5\] drat Rear axle ratio
+-   \[, 6\] wt Weight (1000 lbs)
+-   \[, 7\] qsec 1/4 mile time
+-   \[, 8\] vs Engine (0 = V-shaped, 1 = straight)
+-   \[, 9\] am Transmission (0 = automatic, 1 = manual)
+-   \[,10\] gear Number of forward gears
+-   \[,11\] carb Number of carburetors Note\]
+
+## 1.2 Reading data and converting to a tibble (cars)
+
+`r head(mtcars)`
+
+`r class(mtcars)`
+
+\`\``r [1]: # "\"data.frame\"`"
+
+`r cars <-    mtcars %>% # piping operator from dplyr (shortcut: Ctrl+Shift+M)     rownames_to_column() %>% # do this before changing the data to tibble as the conversion will remove rownames in tibble.     as_tibble() %>%       rename(model = rowname) %>%      print (n = 20, width = Inf)`
+
+`r # A tibble: 32 × 12    model                 mpg   cyl  disp    hp  drat    wt  qsec    vs    am    <chr>               <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>  1 Mazda RX4            21       6 160     110  3.9   2.62  16.5     0     1  2 Mazda RX4 Wag        21       6 160     110  3.9   2.88  17.0     0     1  3 Datsun 710           22.8     4 108      93  3.85  2.32  18.6     1     1  4 Hornet 4 Drive       21.4     6 258     110  3.08  3.22  19.4     1     0  5 Hornet Sportabout    18.7     8 360     175  3.15  3.44  17.0     0     0  6 Valiant              18.1     6 225     105  2.76  3.46  20.2     1     0  7 Duster 360           14.3     8 360     245  3.21  3.57  15.8     0     0  8 Merc 240D            24.4     4 147.     62  3.69  3.19  20       1     0  9 Merc 230             22.8     4 14-     95  3.92  3.15  22.9     1     0 10 Merc 280             19.2     6 168.    123  3.92  3.44  18.3     1     0 11 Merc 280C            17.8     6 168.    123  3.92  3.44  18.9     1     0 12 Merc 450SE           16.4     8 276.    180  3.07  4.07  17.4     0     0 13 Merc 450SL           17.3     8 276.    180  3.07  3.73  17.6     0     0 14 Merc 450SLC          15.2     8 276.    180  3.07  3.78  18       0     0 15 Cadillac Fleetwood   10.4     8 472     205  2.93  5.25  18.0     0     0 16 Lincoln Continental  10.4     8 460     215  3     5.42  17.8     0     0 17 Chrysler Imperial    14.7     8 440     230  3.23  5.34  17.4     0     0 18 Fiat 128             32.4     4  78.7    66  4.08  2.2   19.5     1     1 19 Honda Civic          30.4     4  75.7    52  4.93  1.62  18.5     1     1 20 Toyota Corolla       33.9     4  71.1    65  4.22  1.84  19.9     1     1     gear  carb    <dbl> <dbl>  1     4     4  2     4     4  3     4     1  4     3     1  5     3     2  6     3     1  7     3     4  8     4     2  9     4     2 10     4     4 11     4     4 12     3     3 13     3     3 14     3     3 15     3     4 16     3     4 17     3     4 18     4     1 19     4     2 20     4     1 # ℹ 12 more rows`
+
+`r cars`
+
+## 1.3 Simple Descriptive Statistics
+
+`r summary(cars)`
+
+`r     model                mpg             cyl             disp        Length:32          Min.   :10.40   Min.   :4.000   Min.   : 71.1    Class :character   1st Qu.:15.43   1st Qu.:4.000   1st Qu.:120.8    Mode  :character   Median :19.20   Median :6.000   Median :196.3                       Mean   :20.09   Mean   :6.188   Mean   :230.7                       3rd Qu.:22.80   3rd Qu.:8.000   3rd Qu.:326.0                       Max.   :33.90   Max.   :8.000   Max.   :472.0          hp             drat             wt             qsec        Min.   : 52.0   Min.   :2.760   Min.   :1.513   Min.   :14.50    1st Qu.: 96.5   1st Qu.:3.080   1st Qu.:2.581   1st Qu.:16.89    Median :123.0   Median :3.695   Median :3.325   Median :17.71    Mean   :146.7   Mean   :3.597   Mean   :3.217   Mean   :17.85    3rd Qu.:180.0   3rd Qu.:3.920   3rd Qu.:3.610   3rd Qu.:18.90    Max.   :335.0   Max.   :4.930   Max.   :5.424   Max.   :22.90          vs               am              gear            carb        Min.   :0.0000   Min.   :0.0000   Min.   :3.000   Min.   :1.000    1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:3.000   1st Qu.:2.000    Median :0.0000   Median :0.0000   Median :4.000   Median :2.000    Mean   :0.4375   Mean   :0.4062   Mean   :3.688   Mean   :2.812    3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:4.000   3rd Qu.:4.000    Max.   :1.0000   Max.   :1.0000   Max.   :5.000   Max.   :8.000`
+
+`r glimpse(cars)`
+
+`r Rows: 32 Columns: 12 $ model <chr> "Mazda RX4", "Mazda RX4 Wag", "Datsun 710", "Hornet 4 Drive", "H… $ mpg   <dbl> 21.0, 21.0, 22.8, 21.4, 18.7, 18.1, 14.3, 24.4, 22.8, 19.2, 17.8… $ cyl   <dbl> 6, 6, 4, 6, 8, 6, 8, 4, 4, 6, 6, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 8… $ disp  <dbl> 160.0, 160.0, 108.0, 258.0, 360.0, 225.0, 360.0, 146.7, 140.8, 1… $ hp    <dbl> 110, 110, 93, 110, 175, 105, 245, 62, 95, 123, 123, 180, 180, 18… $ drat  <dbl> 3.90, 3.90, 3.85, 3.08, 3.15, 2.76, 3.21, 3.69, 3.92, 3.92, 3.92… $ wt    <dbl> 2.620, 2.875, 2.320, 3.215, 3.440, 3.460, 3.570, 3.190, 3.150, 3… $ qsec  <dbl> 16.46, 17.02, 18.61, 19.44, 17.02, 20.22, 15.84, 20.00, 22.90, 1… $ vs    <dbl> 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0… $ am    <dbl> 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0… $ gear  <dbl> 4, 4, 4, 3, 3, 3, 3, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 4, 4, 4, 3, 3… $ carb  <dbl> 4, 4, 1, 1, 2, 1, 4, 2, 2, 4, 4, 3, 3, 3, 4, 4, 4, 1, 2, 1, 1, 2…`
+
+`r skimr::skim(cars)`
+
+Variable type: character
+
+Variable type: numeric
+
+# 2. Basic Plotting Methods in Base R
+
+`r # Using a built in plotting function hist(cars$disp, breaks = 10)`
+
+`r #barplot will be discussed later`
+
+# 3. Lattice package
+
+`r library(lattice) xyplot(mpg ~ wt, cars) #xyplot(y~x,data)`
+
+`r histogram(cars$disp, breaks = 10)`
+
+# 4. ggplot2
+
+-   we will use ggplot2 – the best tool in the market for data visualization – from now on.
+
+## 4.1. Elaborate Examples
+
+### 4.1.1 x & y are both continuous with moderator & labeller()
+
+`r cars |>    count(cyl)`
+
+\`\`\`r easy_labels \<- c("4" = "4 Cylinder Cars", "6" = "6 Cylinder Cars", "8" = "8 Cylinder Cars" )
+
+cars %\>% mutate(cyl = factor(cyl)) %\>% ggplot(aes(x = mpg, y = disp, color = cyl)) + geom_point(size=3, color='black' ) + #geom \# geom_jitter() + geom_smooth(method = lm, se = FALSE) + \# facet_grid(cols = vars(cyl), facet_wrap(\~ cyl, #scales = "free_y", ncol = 1, strip.position = "top", labeller = labeller(cyl = easy_labels) ) + #faceting scale_y_continuous(limits = c(0, NA), expand= c(0,0)) + coord_flip() + #coordinate theme_economist() + #labels labs(title = 'MPG vs Displacement', x = 'Miles Per Gallon', y = 'Displacement') + theme( strip.placement = "outside", strip.background = element_blank(), panel.background = element_blank(), panel.grid = element_blank(), axis.line = element_line() ) + guides(color = 'none')\`\`\`
+
+### 4.1.2 x & y are both continuous with moderator & as_labeller()
+
+\`\``r easy_labels_n <- as_labeller(c(`4`= "4 Cylinder Cars",`6`= "6 Cylinder Cars",`8\` = "8 Cylinder Cars" ) )
+
+ggplot(data = cars, aes(x = disp, y = mpg, color = factor(cyl))) + #data geom_point(size=3) + #geometry facet_grid(\~ factor(cyl), labeller = easy_labels_n ) + #faceting theme_bw() + #theme type labs(title = 'MPG vs Displacement', #labels x = 'Displacement', y = 'Miles Per Gallon', color = "\# of Cylender" ) + guides(color = 'none')\`\`\`
+
+## 4.2. One continous variable: geom_histogram()
+
+`r ggplot(data = cars, aes(x = mpg)) +   geom_histogram(binwidth = 5, color = "red", fill = "blue")`
+
+`r ggplot(data = cars, aes(x = mpg, fill = mpg)) +    geom_histogram(binwidth = 3, color = "red", fill = "blue")`
+
+## 4.3. One categorical variable: geom_bar()
+
+### 4.3.1 Bar chart
+
+`r barplot(table(cars$cyl)) # from graphics package`
+
+`r # the same as above in ggplot2 ggplot(data = cars, aes(x = factor(cyl))) +    geom_bar(fill = "blue")`
+
+`r ggplot(data = cars, aes(x = factor(cyl), fill = factor(cyl))) +    geom_bar() +   guides(fill = "none") # remove fill legend.`
+
+### 4.3.2 How to reorder bars in Barplot
+
+#### 4.3.2.1. mpg data
+
+`r #help(mpg)`
+
+A data frame with 234 rows and 11 variables:
+
+-   manufacturer: manufacturer name
+-   model: model name
+-   displ: engine displacement, in litres
+-   year: year of manufacture
+-   cyl: number of cylinders
+-   trans: type of transmission
+-   drv: the type of drive train, where f = front-wheel drive, r = rear wheel drive, 4 = 4wd
+-   cty: city miles per gallon
+-   hwy: highway miles per gallon
+-   fl: fuel type
+-   class: “type” of car
+
+`r mpg <- mpg head(mpg)`
+
+#### 4.3.2.2. Reorder manufacturers by Count of cars
+
+`r ggplot(data = mpg, aes(x = manufacturer, fill = manufacturer)) + #not sorted   geom_bar(stat = "count", show.legend = FALSE) +   coord_flip()`
+
+`r # use reorder bars in inside ggplot function mpg %>%    count(manufacturer, sort = TRUE) %>%    ggplot(aes(x = reorder(manufacturer, n), y = n, fill = manufacturer)) + #reorder() or fct_reorder()/fct_rev()   geom_bar(stat = "identity", show.legend = FALSE)+   coord_flip()`
+
+`r # Use reorder bars inside mutate function during wrangling mpg %>%    count(manufacturer, sort = TRUE) %>%    mutate(manufacturer = fct_reorder(manufacturer, n)          ) %>%    ggplot(aes(x = manufacturer, y = n, fill = manufacturer)) +   geom_bar(stat = "identity", show.legend = FALSE)+   coord_flip()`
+
+## 4.4. Two Variables
+
+### 4.4.1. Cutting a Categorical Var by a Categorical Var: Stacked vs. Dodged vs. Filled Barplots
+
+#### 4.4.1.1. Stack vs. dodged barplots
+
+`r ggplot(data = cars, aes(x = factor(cyl), fill = factor(am))) +   geom_bar(stat = "count", position = "stack") +   labs(x = "Cylinder Size",        y = "# of Cars",        fill = "Automatic vs. Manual"        )`
+
+`r ggplot(data = cars, aes(x = factor(cyl), fill = factor(am))) +   geom_bar(position = "dodge")+   labs(x = "Cylinder Size",        y = "# of Cars",        fill = "Automatic vs. Manual"        )`
+
+#### 4.4.1.2. Stack vs. Filled barplots
+
+`r # stack. ggplot(data = mpg, aes(x = manufacturer, fill = class)) +    geom_bar(stat = "count", position = "stack") +   theme_economist() +   theme(axis.text.x = element_text(angle = 90, hjust = 0)) +   labs(title = "# of Cars by Class for Each Manufacturer",        x = NULL,        y = "# of cars",               ) +   coord_flip()`
+
+`r # fill. ggplot(data = mpg, aes(x = manufacturer, fill = class)) +    geom_bar(stat = "count", position = "fill") + #fill converts count to fraction.   scale_y_continuous(labels = percent) +   theme_economist() +   theme(axis.text.x = element_text(angle = 0, hjust = 0)) +   labs(title = "Percent of cars by class for each Manufacturer",        x = "",        y = NULL,        ) +    coord_flip()`
+
+#### 4.4.1.3. faceted barplots
+
+`r # manufacturer by class ggplot(data = mpg, aes(x = manufacturer, fill = class)) +    geom_bar(stat = "count") +   facet_wrap(~ class) +   theme_bw() +   labs(title = "# of Cars for Manufacturer by class",        x = NULL,        y = "# of cars",               ) +   coord_flip() +   guides(fill = "none")`
+
+`r # class by manufacturer ggplot(data = mpg, aes(x = class, fill = manufacturer)) +    geom_bar(stat = "count") +   facet_wrap(~ manufacturer) +   theme_bw() +   labs(title = "# of Cars for Class by Manufacturer",        x = NULL,        y = "# of cars",               ) +   coord_flip()+   guides(fill = "none")`
+
+### 4.4.2. Scatter plot (x: continuous, y:continuous)
+
+`r mpg %>%    ggplot(aes(cyl, cty))+   geom_point() +   geom_smooth(method = "lm", se = FALSE) + #lm = linear model; se = standard error   geom_jitter()+   theme_economist_white()+   labs(title = "City Mileage versus Cylinders",        subtitle = "Scatter and jitter plot with regression line",        caption = "Source: mpg dataset",        x = "# of Cylnders",        y = "City mileage",         )`
+
+### 4.4.3. x = categorical, y = continous
+
+-   A box plot is best for this situation. A box plot will produce an average of y variable for each level of x.
+-   To use a bar plot for this situation, one needs to average y variable per each level of x variable first before drawing a barplot.
+
+#### 4.4.3.1 Boxplot
+
+`r ggplot(data=cars, aes(x=cyl, y=mpg, group=cyl))+ # the same as below   geom_boxplot(aes(fill = cyl)) # different hues of the same color since cyl is continuous`
+
+`r ggplot(data=cars, aes(x=cyl, y=mpg, group=cyl))+ # the same as below   geom_boxplot(aes(fill = factor(cyl))) # different color since cyl has been factorized and became categorical.`
+
+`r ggplot(data=cars, aes(x=factor(cyl), y=mpg, group = factor(cyl)))+ # group argument doesn't add color.   geom_boxplot()`
+
+`r ggplot(data=cars, aes(x=factor(cyl), y=mpg, fill = factor(cyl)))+ # use fill for coloring inside the box.   geom_boxplot() +      labs(x = "# of Cylinder",          y = "Average Mile Per a Galon of Gasoline",          title = "Fuel Efficiency by Cylinder Size",         ) +   guides(fill = "none")`
+
+`r ggplot(data=cars, aes(x=factor(cyl), y=mpg, color = factor(cyl)))+ # use color to add color to the borderlines.   geom_boxplot()`
+
+#### 4.4.3.2. geom_bar(stat = “identity”)
+
+geom_bar(stat = "identity") = geom_col()
+
+##### (1) Wrong visualization
+
+`r # when y is not a count but another continuous variable, geom_bar() needs stat = 'identity' as below. In this case, just use geom_col(). ggplot(data=cars, aes(x=factor(cyl), y=mpg, fill = factor(cyl))) +   geom_bar(stat = 'identity') # the same as below`
+
+`r ggplot(data=cars, aes(x= cyl, y=mpg, fill = cyl)) +   geom_bar(stat = 'identity') # similar to the above but different hues of the same color.`
+
+`r ggplot(data=cars, aes(x=factor(cyl), y=mpg, fill = factor(cyl))) +   geom_col() # simpler than geom_bar`
+
+However, notice the mpg in the charts created above. mpg for each level of x variable is too high? Would it be sum or average of y for each level of x? Let’s wrangle data first before visualization. You will learn how to wrangle data in another module. Please bear with me for now.
+
+-   sum : The result below shows the same y variable as the one for the two charts above.
+
+`r cars %>%    group_by(cyl) %>% # group_by() is from dplyr   summarize(mpg_sum = sum(mpg)) %>% # summarize() is from dplyr   ggplot(aes(x=factor(cyl), y=mpg_sum, fill = factor(cyl))) +   geom_col()`
+
+-   average : The result below shows the same y variable as the one for boxplot.
+
+`r cars %>%    group_by(cyl) %>%    summarize(mpg_mean = mean(mpg), .groups = "drop") %>%    ggplot(aes(x=factor(cyl), y=mpg_mean, fill = factor(cyl))) +   geom_col()`
+
+-   After observing the two charts above, we can conclude that geom_bar or geom col uses a sum of y for each level of x variable, which is not what we want.
+-   Thus, to use geom_bar or geom_col for categorical x and continuous y, we need to average y for each level of categorical x first before we use goem_bar() or geom_col.
+
+##### (2) Correct visualization
+
+-   calculating mean first during wrangling and use stat=“identity” in geom_bar()
+
+`r cars %>%    group_by(cyl) %>%    summarize(mpg_mean = mean(mpg), .groups = "drop") %>%    ggplot(aes(x = factor(cyl), y = mpg_mean, fill = factor(cyl))) +   geom_bar(stat = 'identity') # the same as above chart`
+
+-   Using stat = “summary” with fun without wrangling
+
+`r cars %>%    ggplot(aes(factor(cyl), mpg, fill = factor(cyl))) +   geom_bar(stat = "summary", fun = mean)`
+
+`r cars %>%    ggplot(aes(factor(cyl), mpg, fill = factor(cyl))) +   geom_bar(stat = "summary", fun = median)`
+
+`r cars %>%    ggplot(aes(factor(cyl), mpg, fill = factor(cyl))) +   geom_bar(stat = "summary", fun = max)`
+
+##### (3) Exercise with geom_col()
+
+> Task : show average of highway mileage by each car class sorted by the performance of the car from best to the worst.
+
+`r head(mpg)`
+
+`r #correct mpg %>%    group_by(class) %>%    summarise(hwy_mean = mean(hwy)) %>%    ggplot(aes(x = reorder(class, hwy_mean), y=hwy_mean, fill=class)) +   geom_col() +   labs(x = "Class",        y = "AVG. Highway MPG",        title = "Average Highway Mile Per Gas by Class"        ) +   coord_flip() +   guides(fill = "none")`
+
+`r # Wrong: why? see the magnitudes of hwy on x-axis. mpg %>%    ggplot(aes(x = reorder(class, hwy), y = hwy, fill=class)) +   geom_col() +   coord_flip()`
+
+`r # Fix the problem mpg %>%    ggplot(aes(x = reorder(class, hwy), y = hwy, fill=class)) +   geom_bar(stat = "summary", fun = mean) +   labs(x = "Class",        y = "AVG. Highway MPG",        title = "Average Highway Mile Per Gas by Class"        ) +   coord_flip() +   guides(fill = "none")`
+
+## 4.5. Three variables (x=Categorical, y=continuous, moderator = categorical)
+
+> In this case, both boxplots and barplots work well. With barplot, we don’t need to calculate average first as R will automatically do so across all levels of the categorical moderator.
+
+### 4.5.1. Boxplot (with facet_grid)
+
+#### (1) Basic with faceting
+
+\`\`\`r ?mtcars
+
+ggplot(data=cars, aes(x=factor(cyl), y=mpg, fill = factor(cyl)))+ geom_boxplot() + facet_grid(\~ factor(am)) + #am Transmission (0 = automatic, 1 = manual) labs(title = "Impact of Cylinder size on mpg across am", x = "Number of Cylinder", y = "Average MPG" )\`\`\`
+
+#### (2) Changing facet label with labeller argument
+
+\``` r # change facet label to_string <- as_labeller(c(`0` = "Automatic", `1` = "Manual")) # for numbers, use ``
+
+ggplot(data=cars, aes(x=factor(cyl), y=mpg, fill = factor(cyl)))+ geom_boxplot(show.legend = FALSE) + facet_grid(\~ factor(am), labeller = to_string) + labs(title = "Impact of Cylinder size on mpg across am", x = "Number of Cylinder", y = "Average MPG" )\`\`\`
+
+### 4.5.2. Barplot
+
+> Note We know barplot doesn’t work when y is continuous, but it works okay when we cut it by another categorical variable (moderator) as you will see below.
+
+#### 4.5.2.1 Dodged Barplot (Changing fill labels)
+
+##### (1) Using mutate()
+
+\`\`\`r \# change moderator's factor level prior to visualization
+
+mtcars %\>% as_tibble() %\>% mutate(am = factor(am), \# change the labels of the factor levels in wrangling am = case_when(am == "0" \~ "Automatic", am == "1" \~ "Manual" ) ) %\>% ggplot(aes(x = factor(cyl), y = mpg, fill = am)) + geom_col(position = "dodge") + labs(title = "Impact of the number of cylinder on MPG across AM", subtitle = "An example of barplot when we don't need to average y varaible", x = "The number of cylinder", y = "Average MPG", fill = "Automatic vs. Manual" )\`\`\`
+
+##### (2) Using scale_fill_discrete(labels = xxx)
+
+\`\`\`r \# change moderator's factor level using scale_fill_discrete()
+
+ggplot(data = mtcars, aes(x = factor(cyl), y = mpg, fill = factor(am))) + geom_bar(stat = 'identity', position = "dodge") + #am Transmission (0 = automatic, 1 = manual) scale_fill_discrete(labels = to_string) + \# change the labels of the factor levels in visualization stage labs(title = "Impact of Cylinder size on mpg across am", x = "Number of Cylinder", y = "Average MPG", fill = "Automatic vs. Manual" )\`\`\`
+
+#### 4.5.2.2 Stacked vs. Filled Barplot
+
+-   Calculate numbers and pass it via stat = “identity” in Barplot
+
+##### (1) Adding % inside Stacked Barplot
+
+`r # stacked bar chart mpg %>%    group_by(manufacturer, class) %>%    tally() %>%    mutate(percent = n/sum(n), .group = "drop") %>%    ggplot(aes(x = reorder(manufacturer, n), y = n, fill = class)) +   geom_bar(stat = "identity") +   geom_text(aes(label = paste0(sprintf("%1.1f", percent*100),"%")),                 position = position_stack(vjust = 0.5),                  color = "white") +   theme_minimal() +   coord_flip()`
+
+`r # The chart below is identical to the first with a one exception. ordering of manufacturer is dropped here. Compare both charts and see the difference. mpg %>%    group_by(manufacturer, class) %>%    tally() %>%    mutate(percent = n/sum(n), .groups = 'drop') %>%    ggplot(aes(x = manufacturer, y = n, fill = class)) +   geom_bar(stat = "identity") +   geom_text(aes(label = paste0(sprintf("%1.1f", percent*100),"%")),                 position = position_stack(vjust = 0.5),                  color = "white") +   theme_minimal() +   coord_flip()`
+
+##### (2) Adding % inside Filled Barplot
+
+\`\`\`r \# filled bar chart
+
+mpg %\>% group_by(manufacturer, class) %\>% tally() %\>% mutate(percent = n/sum(n)) %\>% ggplot(aes(x = manufacturer, y = n, fill = class)) + geom_bar(stat = "identity", position = "fill") + geom_text(aes(label = paste0(sprintf("%1.1f", percent\*100),"%")), position = position_fill(vjust = 0.5), color = "white" ) + theme_minimal() + labs(title = "Percent of Cars by class across manufacturers", x = "Car Brand", y = "Percentage", ) + coord_flip()\`\`\`
+
+### 4.5.3. Scatterplot (two continuous variable cut by a categorical variable)
+
+`r mpg %>%    ggplot(aes(x = factor(cyl), y = cty))+   geom_point(alpha = .5) +   geom_smooth(method = "lm", se = FALSE) + #lm = linear model; se = standard error   geom_jitter()+   facet_wrap(~ drv)+    #facet_grid(cols = vars(trans)) +   theme_economist_white()+   labs(title = "Impact of Cylinders on City Mileage across Type of Drive Train",        subtitle = "Scatter and jitter plot with regression line",        caption = "Source: mpg dataset",        x = "# of Cylnders",        y = "City mileage",         )`
+
+## 4.6. Five variables (x=Continuous, y=continuous, color, size, facet)
+
+`r mpg %>%    ggplot(aes(displ, cty)) +   geom_point(aes(color = drv, size = cyl),              alpha = 0.5)+   geom_smooth() +   scale_size_continuous(range = c(3, 8))+   facet_wrap(~ year)`
+
+`r mpg %>%    ggplot(aes(displ, cty)) +   geom_point(aes(color = drv, size = cyl),              alpha = 0.5)+   geom_smooth(method = lm) +   facet_wrap(~ year) +   scale_size_continuous(range = c(3, 8))+   labs(x = "Engine Size",        y = "City MPG",        title = "Fuel Efficiency") +   theme_bw()`
+
+# 5. Correlations with ggpairs()
+
+## 5.1. Simple chart
+
+`r # simple ggpairs(cars %>% select(cyl, mpg, disp, wt, qsec))`
+
+## 5.2. Correlations groped by categorical variables
+
+`r ggpairs(cars, columns = 2:5,         aes(color = factor(am))         )`
+
+`r ggpairs(iris, columns = 1:4,         aes(color = Species)         )`
+
+# 6. Interactive plots
+
+`r # library(plotly) plot <- ggplot(data = cars, aes(x = hp, y = qsec)) +    geom_point() +    geom_smooth() ggplotly(plot)`
+
+# 7. Labeling with ggrepel::geom_label()/ geom_label_repel()
+
+## 7.1. Additive method
+
+`r library(ggrepel) plot +    geom_label(aes(label=model))`
+
+`r plot +    geom_label_repel(aes(label = model))`
+
+## 7.2 Piping method
+
+`r cars %>%    ggplot(aes(x = hp, y = qsec)) +    geom_point() +    geom_smooth() +   geom_label_repel(aes(label=model))`
+
+# 8. Saving plots
+
+`r ggsave(filename = "mygraph.png", plot, dpi = 300)`
+
+# 9. References
+
+-   R Studio Cheatsheets: https://posit.co/resources/cheatsheets/
+-   R4DS Book: https://r4ds.hadley.nz/data-visualize
+-   ggplot2: elegant graphics for data analysis by Hadley Wickham: https://ggplot2-book.org/index.html
+-   The R Graph Gallery: https://r-graph-gallery.com/index.html
