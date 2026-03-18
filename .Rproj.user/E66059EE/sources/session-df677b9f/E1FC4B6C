@@ -3,7 +3,7 @@
     "path": "/cloud/project/Course folder /M03/Peoples, Aiyon w07-data-wrangling-sec2.qmd",
     "project_path": "Course folder /M03/Peoples, Aiyon w07-data-wrangling-sec2.qmd",
     "type": "quarto_markdown",
-    "hash": "3498042358",
+    "hash": "1625151833",
     "contents": "",
     "dirty": false,
     "created": 1772668373583.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "21,26",
+        "cursorPosition": "21,29",
         "scrollLine": "15"
     },
     "folds": "",
-    "lastKnownWriteTime": 1773875578,
+    "lastKnownWriteTime": 1773876401,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1773875578893,
+    "last_content_update": 1773876401456,
     "read_only": false,
     "read_only_alternatives": []
 }

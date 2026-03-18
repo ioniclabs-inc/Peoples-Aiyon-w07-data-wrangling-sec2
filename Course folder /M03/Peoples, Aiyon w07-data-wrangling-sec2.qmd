@@ -10,7 +10,7 @@ format:
       toc: true
       toc-depth: 3
       tocc-location: left
-      embed-resources: 
+      embed-resources: true
 output: html_document
 editor_options: 
   markdown: 
@@ -19,7 +19,7 @@ execute:
   freeze: auto
 ---
 
-## learning outcome ya dig
+## learning outcome ya digggg
 
 :::: callout-tip
 -Describe the concept of Data Wrangling.
